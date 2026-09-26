@@ -1,0 +1,20 @@
+# Never upload secrets
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+# Not needed for the frontend build (it uses soteria-frontend/ and data/)
+.git
+**/node_modules
+agent
+soteria
+tests
+view
+scripts
+docs
+relayer
+sensor-demo
+contracts
+.venv
+**/__pycache__

@@ -28,20 +28,22 @@ transactions don't conflict and run in parallel, and money moves per second whil
 
 | | |
 |---|---|
-| Factory | [`0x32b3b3a8fa69ba86e6c20494af5199d7535e823f`](https://testnet.monadvision.com/address/0x32b3b3a8fa69ba86e6c20494af5199d7535e823f) |
+| Factory | [`0x125a0db0c0ec3bd47abb8d82c53e4bc312406d28`](https://testnet.monadvision.com/address/0x125a0db0c0ec3bd47abb8d82c53e4bc312406d28) |
 | Sensor gateway (oracle, pays gas) | `0x626422741d45C6470d28b93C367DB405671DdC86` |
 | Wallet 1 · carrier | `0xe59841AdB191937C04934189AC34f6A5e8FBeA2c` |
 | Wallet 2 · customer | `0x610C0DD8eA0f80e29d942a5977BAf6429E6BC020` |
 
 | Condition | Contract |
 |---|---|
-| `s1/W02/temp` | [`0xC84370c5442526EE74f6DF1a9c887ED85e908B1d`](https://testnet.monadvision.com/address/0xC84370c5442526EE74f6DF1a9c887ED85e908B1d) |
-| `s1/W05/temp` | [`0x0Da1FC9845b1CB47629CB9F181486070A8a8A6F4`](https://testnet.monadvision.com/address/0x0Da1FC9845b1CB47629CB9F181486070A8a8A6F4) |
-| `s3/W02/temp` | [`0x2aD99958386df7B4eC0A299077D75e795262b1c7`](https://testnet.monadvision.com/address/0x2aD99958386df7B4eC0A299077D75e795262b1c7) |
-| `s3/W04/temp` | [`0xcf10f652b9d92D92A7138A352e8d2B290e35922D`](https://testnet.monadvision.com/address/0xcf10f652b9d92D92A7138A352e8d2B290e35922D) |
-| `s3/W05/pressure` | [`0xd2A4c3Bd2C130952f868b7532aDb4A6f569234Fb`](https://testnet.monadvision.com/address/0xd2A4c3Bd2C130952f868b7532aDb4A6f569234Fb) |
-| `s3/W05/shock` | [`0x7F51809e9FeD0d981a48293bD7C054B007CF611C`](https://testnet.monadvision.com/address/0x7F51809e9FeD0d981a48293bD7C054B007CF611C) |
-| `s3/W07/temp` | [`0x46a7EC62d3Af72820275AC9981EA487CDD764f91`](https://testnet.monadvision.com/address/0x46a7EC62d3Af72820275AC9981EA487CDD764f91) |
+| `s1/W02/temp` | [`0x7aD5D79b2B4b43754629A710cE1d91FF718742C9`](https://testnet.monadvision.com/address/0x7aD5D79b2B4b43754629A710cE1d91FF718742C9) |
+| `s1/W05/temp` | [`0x8064E51Eb182aDf852E03Bd8f6688FbADA381Efa`](https://testnet.monadvision.com/address/0x8064E51Eb182aDf852E03Bd8f6688FbADA381Efa) |
+| `s3/W02/temp` | [`0xDC578fe907E4F34b347BBC47C9c2c45b60CEf7F4`](https://testnet.monadvision.com/address/0xDC578fe907E4F34b347BBC47C9c2c45b60CEf7F4) |
+| `s3/W04/temp` | [`0x08A99e0E2a28356AE204FcAb350A08aa66499387`](https://testnet.monadvision.com/address/0x08A99e0E2a28356AE204FcAb350A08aa66499387) |
+| `s3/W05/pressure` | [`0x56C68686d05AcaB1445acb0AD623072925B14CD1`](https://testnet.monadvision.com/address/0x56C68686d05AcaB1445acb0AD623072925B14CD1) |
+| `s3/W05/shock` | [`0xc274f4Ce8590BecbB764718A329Ec03f9b30bA8F`](https://testnet.monadvision.com/address/0xc274f4Ce8590BecbB764718A329Ec03f9b30bA8F) |
+| `s3/W07/temp` | [`0x60E847DdC7ecDd518379AB0c33bA501D288007f7`](https://testnet.monadvision.com/address/0x60E847DdC7ecDd518379AB0c33bA501D288007f7) |
+
+These are the second set (26 Sep, 16:35). The first set (factory `0x32b3b3a8fa69ba86e6c20494af5199d7535e823f`, `deployments/testnet-first-run.json`) reached the pharma cap in testing.
 
 First run (`data/payout-demo-testnet.log`): 98 readings in 27 s; the frozen-food and pharma wagons ran out of
 limits, nothing was paid for 10 s, then 8 payments sent 0.0336 MON to wallet 2 (70.0000 → 70.0336 MON) until they

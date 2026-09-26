@@ -20,8 +20,6 @@ export const SENSOR_ABI = parseAbi([
 ]);
 
 type Tpl = { caseId: string; trigger: number; limit: number; center: number; spread: number; breach: number; graceS: number };
-// A wagon stays out of limits this long after its excursion started (grace + a few paid seconds), then cools down.
-const EXCURSION_S = 22;
 const HOT_GAS = 160_000n;
 export type RoundResult =
   | {
@@ -64,10 +62,9 @@ export async function runRound(env: Record<string, string | undefined>, triggerC
   const tpls = new Map<string, Tpl>((dep.templates as Tpl[]).map((t) => [t.caseId, t]));
   const active = dep.copies.slice(0, MAX_TX_PER_ROUND);
   if (triggerCaseId && !active.some((c) => c.caseId === triggerCaseId)) return { ok: false, error: `unknown condition ${triggerCaseId}` };
-  // which wagons are out of limits: the one the button asks for, plus any excursion still running on chain
-  const nowS = Math.floor(Date.now() / 1000);
-  const starts = await Promise.all(active.map((c) => pub.readContract({ address: c.address as Address, abi: SENSOR_ABI, functionName: "breachStart" })));
-  const hotSet = new Set(active.filter((c, i) => c.caseId === triggerCaseId || (starts[i] > 0 && nowS - Number(starts[i]) < EXCURSION_S)).map((c) => c.address));
+  // out of limits only when the caller says so (the page sends the trigger for the hot rounds). Deciding it from an
+  // on-chain read was unreliable: public RPCs lag each other by seconds and returned a stale breachStart of 0.
+  const hotSet = new Set(active.filter((c) => c.caseId === triggerCaseId).map((c) => c.address));
 
   const fees = await pub.estimateFeesPerGas();
   let nonce = await pub.getTransactionCount({ address: account.address, blockTag: "pending" });
