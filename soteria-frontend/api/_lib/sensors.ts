@@ -43,7 +43,8 @@ const SAMPLE_EVERY = 10;
 const MAX_TX_PER_ROUND = 40;
 let lastRun = 0;
 
-export async function runRound(env: Record<string, string | undefined>, triggerCaseId?: string): Promise<RoundResult> {
+// `only`: send a reading to this one wagon (the hot one during an excursion) instead of all of them, to save gas.
+export async function runRound(env: Record<string, string | undefined>, triggerCaseId?: string, only?: string): Promise<RoundResult> {
   const key = env.SENSOR_GATEWAY_KEY as Hex | undefined;
   if (!key) return { ok: false, error: "SENSOR_GATEWAY_KEY is not set on the server" };
   if (Date.now() - lastRun < 4000) return { ok: false, error: "a round is already running or just ran; try again in a few seconds" };
@@ -60,7 +61,7 @@ export async function runRound(env: Record<string, string | undefined>, triggerC
   if (balance < minMon) return { ok: false, error: `gateway balance ${formatEther(balance)} MON is below the ${formatEther(minMon)} MON floor` };
 
   const tpls = new Map<string, Tpl>((dep.templates as Tpl[]).map((t) => [t.caseId, t]));
-  const active = dep.copies.slice(0, MAX_TX_PER_ROUND);
+  const active = dep.copies.filter((c) => !only || c.caseId === only).slice(0, MAX_TX_PER_ROUND);
   if (triggerCaseId && !active.some((c) => c.caseId === triggerCaseId)) return { ok: false, error: `unknown condition ${triggerCaseId}` };
   // out of limits only when the caller says so (the page sends the trigger for the hot rounds). Deciding it from an
   // on-chain read was unreliable: public RPCs lag each other by seconds and returned a stale breachStart of 0.
@@ -80,10 +81,12 @@ export async function runRound(env: Record<string, string | undefined>, triggerC
     );
     samples += window.length;
     const value = window[window.length - 1];
-    let g = gas.get(c.address);
+    // Monad charges the gas limit. Readings in limits: estimate once +25 %. Out of limits: fixed HOT_GAS, because the
+    // grace period can end between estimate and inclusion and the paying path then needs more gas (seen on testnet).
+    let g = heat ? HOT_GAS : gas.get(c.address);
     if (!g) {
-      g = heat ? HOT_GAS : ((await pub.estimateContractGas({ address: c.address as Address, abi: SENSOR_ABI, functionName: "report", args: [value], account })) * 125n) / 100n;
-      if (!heat) gas.set(c.address, g);
+      g = ((await pub.estimateContractGas({ address: c.address as Address, abi: SENSOR_ABI, functionName: "report", args: [value], account })) * 125n) / 100n;
+      gas.set(c.address, g);
     }
     const raw = await account.signTransaction({
       chainId: chain.id, type: "eip1559", to: c.address as Address, nonce: nonce++, gas: g,

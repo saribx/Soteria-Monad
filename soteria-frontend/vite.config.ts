@@ -13,8 +13,9 @@ const sensorsApiDev = (): Plugin => ({
       let body = '';
       for await (const chunk of req) body += chunk;
       let trigger: string | undefined;
-      try { trigger = JSON.parse(body || '{}').trigger; } catch { /* normal round */ }
-      const result = await runRound(env, trigger).catch((e: Error) => ({ ok: false, error: e.message }));
+      let only: string | undefined;
+      try { ({ trigger, only } = JSON.parse(body || '{}')); } catch { /* normal round */ }
+      const result = await runRound(env, trigger, only).catch((e: Error) => ({ ok: false, error: e.message }));
       res.statusCode = result.ok ? 200 : 409;
       res.setHeader('content-type', 'application/json');
       res.end(JSON.stringify(result));
