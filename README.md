@@ -1,4 +1,134 @@
-# Soteria on Monad
+<div align="center">
+
+# 🚆 Soteria · Paid per Second
+
+### Too hot? Get paid. Every second.
+
+**Freight sensors that settle their own claims on Monad.**
+A wagon's cargo leaves its limits → the contract pays the customer in MON, **in the same transaction as the reading**.
+
+[**▶ Live demo**](https://soteria-monad.vercel.app/sensors.html) · [Dashboard](https://soteria-monad.vercel.app) · [A real payment on the explorer](https://testnet.monadvision.com/tx/0x49103714c29da0a701ac80226bddd2f21736757810b08efbee50b215c1df5569) · [Contract](https://testnet.monadvision.com/address/0x125a0db0c0ec3bd47abb8d82c53e4bc312406d28)
+
+`Monad testnet` · `Solidity` · `Foundry` · `viem` · `React/Vite` · `Mapbox` · `Vercel`
+
+Built at **Monad Blitz Berlin**, 26 Sep 2026
+
+</div>
+
+---
+
+## From darknet to daylight
+
+Blockchain got famous on the darknet: pay, and prove nothing. **We flip it.**
+
+| 2011 | 2026 · this repo |
+|---|---|
+| Anonymous payments, nobody can prove who did what | Named parties: carrier, customer, sensor gateway |
+| "Blockchain" = dubious | Every reading and every payment public and permanent |
+| Rules bent by whoever holds the data | Rules fixed in code before the trip; nobody can change a reading afterwards |
+
+The customer, the insurer and a court all read **the same record**. The next step is insurance that pays on proof, and carriers whose clean runs become a track record they own.
+
+## The rule in 30 seconds
+
+1. 🔒 **Bond in the contract.** The carrier funds it; terms come from the case data.
+2. 🔥 **A reading past the limit** starts an excursion, timed by the block clock.
+3. ⏳ **Grace period** (10 s for reefers): nothing is paid.
+4. 💸 **Every reading after that pays `seconds × rate`** in MON to the customer, in that transaction, up to the cap.
+5. ❄️ **Back in limits:** payments stop. On delivery, the rest of the bond goes back to the carrier.
+
+| Cargo | Limit | Grace | Rate | Cap |
+|---|---|---|---|---|
+| Frozen food | above −15 °C | 10 s | €20/s | €6,000 |
+| Pharmaceuticals | above 8 °C | 10 s | €400/s | €12,000 |
+| Hazardous liquid | pressure below 3.8 bar / shock above 2 g | none | lump sum | €9,000 |
+
+Demo scale: **1 MON = €100,000**, so the pharma rate is 0.004 MON/s.
+
+```mermaid
+flowchart LR
+  S["🌡️ Wagon sensors<br/>4 Hz, simulated"] -->|every 10th sample<br/>breach at once| G["Sensor gateway<br/>Vercel /api/sensors<br/>relayer"]
+  G -->|"report(value)<br/>all sensors at once"| C
+  subgraph M["Monad testnet"]
+    C["7 × SensorPayout<br/>own storage each → parallel"]
+    R["SoteriaRail<br/>bookings · delays · disputes"]
+  end
+  C -->|"💸 MON per second<br/>same tx"| W2["Wallet 2 · customer"]
+  C -->|refund on delivery| W1["Wallet 1 · carrier"]
+  C -. events .-> D["📊 Dashboards<br/>sensors.html · map · tx history"]
+  R -. events .-> D
+```
+
+## Why Monad
+
+| | Measured today | Why it matters |
+|---|---|---|
+| ⚡ **0.3 s blocks** | 60 blocks in 18 s during a pharma excursion | A per-second payment needs a chain that settles faster than the clock ticks |
+| 🔀 **Parallel execution** | 7 sensors send at the same moment, each contract has its own storage | Thousands of wagons don't queue behind each other |
+| 🧱 **150M gas per block** | measured on testnet | Room for a whole fleet's readings |
+| 🛠️ **Plain EVM** | Solidity, Foundry and viem unchanged | Nothing new to learn; any EVM team can integrate |
+
+> Other chains can record that the cargo got warm. **Monad pays for it while it is still warm.**
+
+## Proof: every row is a real testnet transaction
+
+The pharma wagon `s3/W02`, 26 Sep 2026, 13:52 UTC:
+
+| t | Reading | What the contract did | Paid to the customer |
+|---|---|---|---|
+| +0 s | 8.8 °C | excursion starts, grace 10 s | – |
+| +2 … +10 s | 9.0 → 9.8 °C | grace: nothing paid | – |
+| +13 s | 10.0 °C | pays 3 s × 0.004 | [0.012 MON](https://testnet.monadvision.com/tx/0x84d66446c05591d8d639ddb48274d8231c682f511df736bb8c5e98d5a4f43613) |
+| +14 s | 10.2 °C | pays 1 s | [0.004 MON](https://testnet.monadvision.com/tx/0x31fef9d675798a0ad4d31e9dc1805a711d749a8814b9413b7b5889fa8d84051b) |
+| +16 s | 10.4 °C | pays 2 s | [0.008 MON](https://testnet.monadvision.com/tx/0x12d03a83c5f517a4f71caeb500e4728f050a69db3fa8286c875c343518c1df36) |
+| +18 s | 5.4 °C | pays 2 s, then **back in limits: excursion ends** | [0.008 MON](https://testnet.monadvision.com/tx/0xa74fd1a7af99e75e6597f2b800f90b92cf24c369a59e408f9c00b2e4b7e300a3) |
+
+Across the day's runs: **127+ transactions, 0 failed**, customer wallet [`0x610C…C020`](https://testnet.monadvision.com/address/0x610C0DD8eA0f80e29d942a5977BAf6429E6BC020) paid in native MON. You can see it in any wallet, with no token import. The full history is in [`sensor-demo/data/tx-dashboard.html`](sensor-demo/data/tx-dashboard.html).
+
+On [the live page](https://soteria-monad.vercel.app/sensors.html) every payment pops up as a card. Click it to open the transaction on the explorer.
+
+## What's in the box
+
+| | What it does | Where |
+|---|---|---|
+| **SensorPayout** | One contract per wagon condition, deployed as EIP-1167 copies; grace, per-second MON payments, cap, refund | [`contracts/src/SensorPayout.sol`](contracts/src/SensorPayout.sol) · [`sensor-demo/`](sensor-demo/) · [`/sensors.html`](https://soteria-monad.vercel.app/sensors.html) |
+| **SoteriaRail** | Full rail logistics: bookings, carrier bond, cold-chain accrual, hazmat alerts, delays with a challenge window, two-signature settlements | [`contracts/src/SoteriaRail.sol`](contracts/src/SoteriaRail.sol) · [`relayer/`](relayer/) · [dashboard](https://soteria-monad.vercel.app) |
+| **Dashboards** | 3D map, fleet sensors, transactions log, payment pop-ups, tx history | [`soteria-frontend/`](soteria-frontend/) |
+
+**32 Foundry tests** (22 SoteriaRail + 10 SensorPayout).
+
+### What is real, what is simulated
+
+| | |
+|---|---|
+| ✅ **Real** | Transactions, contract logic, MON payments on Monad testnet |
+| 🧪 **Simulated** | Sensor values (a 4 Hz stream in code; every 10th sample on chain, a breach at once) |
+| 📏 **Demo scale** | Amounts: 1 MON = €100,000; timings compressed (grace 10 s) |
+
+## Quickstart
+
+```shell
+# Public: nothing to install
+open https://soteria-monad.vercel.app/sensors.html        # press "Overheat · pharma"
+
+# Contracts
+cd contracts && forge install foundry-rs/forge-std --no-git && forge test   # 32 tests
+
+# Sensor contracts on testnet (needs sensor-demo/.env: NETWORK=testnet, SENSOR_GATEWAY_KEY, WALLET_1, WALLET_2)
+cd sensor-demo && npm i && npm run deploy && npm run demo
+
+# Whole demo on this machine against testnet (relayer :8787 + dashboard :5173)
+./demo-local.sh
+```
+
+Deployed on Monad testnet:
+- **SensorPayoutFactory:** [`0x125a0db0c0ec3bd47abb8d82c53e4bc312406d28`](https://testnet.monadvision.com/address/0x125a0db0c0ec3bd47abb8d82c53e4bc312406d28)
+- **SoteriaRail:** [`0x01ca38e6540091d95f68d944430aafbd827654d2`](https://testnet.monadvision.com/address/0x01ca38e6540091d95f68d944430aafbd827654d2)
+- **TEUR:** [`0x097b2ec554028c91f207570c7d6dab8b70747275`](https://testnet.monadvision.com/address/0x097b2ec554028c91f207570c7d6dab8b70747275)
+
+---
+
+# SoteriaRail: the full rail system
 
 Real-time monitoring of freight trains with automatic compensation. Wagons with
 sensitive cargo report their sensors to Monad. When the cold chain breaks or a train
@@ -128,8 +258,8 @@ to hide the buttons.
    - The carrier disputes (force majeure).
    - Soteria assesses the damage to W03, which has no sensor. Chemiewerk signs:
      €24,000 is paid from the pool and the delay is waived.
-4. **Storm burst:** 50 wagons on the corridor switch to 1 Hz at once, ~1,500 readings
-   in 30 s. The readings/s spike while the latency stays flat.
+4. **Storm burst:** 20 wagons on the corridor switch to 1 Hz at once, ~240 readings
+   in 12 s. The readings/s spike while the latency stays flat.
 
 ## Cost and safeguards
 
@@ -144,14 +274,14 @@ path has its own tight limit:
 | tank / locomotive reading | 60k | 67k |
 
 At the 100 gwei minimum base fee a reading costs ~0.006 MON (~$0.0001). One full demo
-(go live, s1, s3, storm, a few minutes of heartbeats) costs **~13 MON**; ~9 MON of that
-is the storm.
+(go live, s1, s3, storm, a few minutes of heartbeats) costs **~5–6 MON**; the storm is
+~1.4 MON since it was resized to 20 wagons × 12 s (50 × 30 s cost ~9 MON).
 
 **Plan for the 50 MON:**
 
 - setup ~0.5 MON
-- one mainnet dry run ~13 MON
-- the pitch ~13 MON
+- one mainnet dry run ~6 MON
+- the pitch ~6 MON
 - the rest in reserve
 
 Rehearse on the local chain; it is free.
