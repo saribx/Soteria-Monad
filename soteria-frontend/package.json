@@ -12,7 +12,8 @@
     "lucide-react": "^1.16.0",
     "mapbox-gl": "^3.30.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "viem": "^2.56.9"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",

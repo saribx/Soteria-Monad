@@ -1,0 +1,22 @@
+{
+  "name": "soteria-relayer",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Simulated wagon sensors, scenario timelines and keeper for SoteriaRail on Monad",
+  "scripts": {
+    "chain": "anvil --network monad --block-time 0.3 --chain-id 31337 --silent",
+    "setup": "tsx --env-file-if-exists=.env src/setup.ts",
+    "start": "tsx --env-file-if-exists=.env src/server.ts",
+    "sweep": "tsx --env-file-if-exists=.env src/sweep.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "viem": "^2.56.9"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

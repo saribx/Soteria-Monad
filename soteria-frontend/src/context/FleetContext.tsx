@@ -3,6 +3,66 @@ import { FleetAsset, TransitRoute, IncidentAlert, FleetMetrics, AssetType } from
 import { MOCK_ASSETS, MOCK_ROUTES, MOCK_INCIDENTS, MOCK_METRICS } from '../data/mockFleetData';
 import { measuredCorridor } from '../map/railGeometry';
 import { currentHeadAlong } from '../map/trainModel';
+import { channels, live } from '../chain/store';
+import { caseOfAsset } from '../chain/cases';
+import type { CaseId, Phase } from '../chain/types';
+
+// Where each demo train is in its story. Without a relayer the dashboard shows
+// the recorded incident ('offline'); with one, damage, obstruction and the
+// incident report only appear once the scenario has triggered them on chain.
+type LivePhase = Phase | 'offline';
+
+function readPhases(): Record<CaseId, LivePhase> {
+  const st = live.relayer ? live.state : undefined;
+  return { s1: st?.cases.s1.phase ?? 'offline', s3: st?.cases.s3.phase ?? 'offline' };
+}
+
+/** The asset as it looks in a phase, continuing from where the train is now. */
+function assetInPhase(current: FleetAsset, caseId: CaseId, phase: LivePhase, simulating: boolean, speedFactor: number): FleetAsset {
+  const base = MOCK_ASSETS.find(a => a.id === current.id);
+  if (!base?.track || !current.track) return current;
+  const line = measuredCorridor(base.track.corridorId);
+  if (!line) return current;
+  const spec = live.hello?.demo.cases[caseId];
+  const now = Date.now();
+  let head = currentHeadAlong(current, now, simulating, speedFactor);
+  const stamp = new Date(now).toLocaleDateString('en-US') + ', ' + new Date(now).toLocaleTimeString('en-US');
+
+  if (phase === 'offline' || phase === 'incident') {
+    const speedKmh = phase === 'offline' ? base.speedKmh : spec?.speed_kmh.after ?? base.speedKmh;
+    return {
+      ...base,
+      speedKmh,
+      coordinates: line.pointAt(head),
+      heading: Math.round(line.bearingAt(head)),
+      updatedAt: phase === 'incident' ? stamp : base.updatedAt,
+      track: { ...base.track, headAlongM: head, updatedAtMs: now },
+    };
+  }
+
+  // Before the incident: a train waiting to leave starts behind the incident site
+  const behind = spec?.start_behind_m;
+  if (behind && phase === 'idle') head = base.track.headAlongM - behind;
+  const speedKmh = behind && phase === 'idle' ? 0 : spec?.speed_kmh.before ?? base.speedKmh;
+  return {
+    ...base,
+    status: 'online',
+    statusText: phase === 'idle'
+      ? (speedKmh ? 'Running normally' : `Ready to depart ${base.origin}`)
+      : 'Running normally · sensitive wagons report to Monad',
+    speedKmh,
+    delayMin: 0,
+    nextStation: 'On schedule',
+    cargoIntegrityPct: 100,
+    currentTempC: base.targetTempC,
+    coordinates: line.pointAt(head),
+    heading: Math.round(line.bearingAt(head)),
+    compartments: base.compartments.map(c => ({ ...c, status: 'nominal', temp: c.temp !== undefined ? base.targetTempC : undefined })),
+    wagons: base.wagons?.map(w => ({ ...w, damaged: false, damage: undefined })),
+    updatedAt: stamp,
+    track: { ...base.track, headAlongM: head, updatedAtMs: now, trackBlocked: false, obstruction: undefined },
+  };
+}
 
 interface FleetContextType {
   assets: FleetAsset[];
@@ -40,7 +100,30 @@ const FleetContext = createContext<FleetContextType | undefined>(undefined);
 export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [assets, setAssets] = useState<FleetAsset[]>(MOCK_ASSETS);
   const [routes] = useState<TransitRoute[]>(MOCK_ROUTES);
-  const [incidents] = useState<IncidentAlert[]>(MOCK_INCIDENTS);
+  const [recordedIncidents] = useState<IncidentAlert[]>(MOCK_INCIDENTS);
+  const [phases, setPhases] = useState<Record<CaseId, LivePhase>>(readPhases);
+
+  // Follow the scenario phases (only re-render when a phase actually changes)
+  useEffect(() => {
+    const unsubscribe = channels.state.subscribe(() => {
+      const next = readPhases();
+      setPhases(prev => (prev.s1 === next.s1 && prev.s3 === next.s3 ? prev : next));
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // An incident is reported once it has happened
+  const incidents = recordedIncidents
+    .filter(i => {
+      const c = caseOfAsset(i.assetId);
+      return !c || phases[c] === 'offline' || phases[c] === 'incident';
+    })
+    .map(i => {
+      const c = caseOfAsset(i.assetId);
+      return c && phases[c] === 'incident' ? { ...i, timeAgo: 'just now' } : i;
+    });
   const [selectedAsset, setSelectedAsset] = useState<FleetAsset | null>(null);
   const [hoveredAsset, setHoveredAsset] = useState<FleetAsset | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<IncidentAlert | null>(null);
@@ -175,6 +258,17 @@ export const FleetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         : asset));
     };
   }, [isSimulating, simulationSpeed]);
+
+  // Damage, obstruction and speed follow the phase of each demo train
+  useEffect(() => {
+    const next = assets.map(asset => {
+      const c = caseOfAsset(asset.id);
+      return c ? assetInPhase(asset, c, phases[c], isSimulating, simulationSpeed) : asset;
+    });
+    setAssets(next);
+    setSelectedAsset(sel => (sel ? next.find(a => a.id === sel.id) ?? sel : sel));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phases.s1, phases.s3]);
 
   return (
     <FleetContext.Provider

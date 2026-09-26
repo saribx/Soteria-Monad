@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFleet } from '../../context/FleetContext';
 import { Train, Truck, AlertTriangle, CheckCircle2, Clock, MapPin, Gauge, Package, Filter } from 'lucide-react';
+import { WagonSensors } from '../chain/WagonSensors';
 import './fleet-view.css';
 
 export const FleetView: React.FC = () => {
@@ -162,6 +163,9 @@ export const FleetView: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Live sensors: 4 Hz device stream and readings on Monad */}
+              <WagonSensors asset={asset} />
             </div>
           );
         })}

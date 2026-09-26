@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FleetProvider } from './context/FleetContext';
 import { TopNavBar } from './components/layout/TopNavBar';
 import { InteractiveMap3D } from './components/map/InteractiveMap3D';
@@ -10,6 +10,9 @@ import { EditAssetDrawer } from './components/modals/EditAssetDrawer';
 import { FleetView } from './components/fleet/FleetView';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { IncidentsView } from './components/incidents/IncidentsView';
+import { MonadPanel } from './components/chain/MonadPanel';
+import { ChainToasts } from './components/chain/ChainToasts';
+import { startLive } from './chain/store';
 
 const DashboardContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('live-map');
@@ -23,6 +26,9 @@ const DashboardContent: React.FC = () => {
   const toggleMapOnlyMode = () => {
     setIsMapOnlyMode(prev => !prev);
   };
+
+  // Device stream from the relayer and contract events straight from Monad
+  useEffect(() => startLive(), []);
 
   return (
     <div className="app-container">
@@ -63,6 +69,9 @@ const DashboardContent: React.FC = () => {
             {/* Bottom Metrics (Schedule Offset ±2.5 min & Live Volume 142,580) */}
             <BottomMetricsPanel />
 
+            {/* Right: the chain, the scenario controls and their timeline */}
+            <MonadPanel />
+
             {/* Floating Unit Editor Drawer */}
             {isEditDrawerOpen && (
               <EditAssetDrawer onClose={() => setIsEditDrawerOpen(false)} />
@@ -71,8 +80,8 @@ const DashboardContent: React.FC = () => {
         )
       )}
 
-
-
+      {/* Payouts, alerts and anchored decisions as they land on chain (all tabs) */}
+      <ChainToasts />
     </div>
   );
 };

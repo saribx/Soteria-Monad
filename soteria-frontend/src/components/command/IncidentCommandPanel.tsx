@@ -1,8 +1,11 @@
 import React from 'react';
-import { ShieldCheck, KeyRound, Lock, Users, Train, MapPin, AlertTriangle, Gauge, Clock } from 'lucide-react';
+import { ShieldCheck, KeyRound, Lock, Users, Train, MapPin, AlertTriangle, Gauge, Clock, Loader2 } from 'lucide-react';
 import { useFleet } from '../../context/FleetContext';
 import { SOTERIA_BY_INCIDENT } from '../../data/mockFleetData';
 import type { FleetAsset, TrainWagon } from '../../types/fleet';
+import { ContractCard } from '../chain/ContractCard';
+import { channels, explorerTx, live, useChannel } from '../../chain/store';
+import { caseOfAsset } from '../../chain/cases';
 import './command-panel.css';
 
 // Bottom of the live map: everything the operator needs about the incident
@@ -18,9 +21,32 @@ const cargoOf = (w: TrainWagon) => CARGO[w.cargoClass] ?? { label: w.cargoClass.
 
 const TIER_ACCENT: Record<number, string> = { 1: 'var(--accent-emerald)', 2: 'var(--accent-amber)', 3: 'var(--accent-rose)' };
 
-const DecisionCard: React.FC<{ incidentId: string; trainName: string }> = ({ incidentId, trainName }) => {
+// During a live run the decision exists once Soteria has anchored it on chain
+function useAnchor(assetId: string) {
+  useChannel(channels.chain);
+  useChannel(channels.state);
+  const caseId = caseOfAsset(assetId);
+  const st = live.relayer ? live.state : undefined;
+  if (!caseId || !st || st.cases[caseId].phase !== 'incident') return { live: false as const };
+  const sid = st.cases[caseId].shipmentId;
+  const anchor = live.chain.events.find(e => e.name === 'DecisionAnchored' && Number(e.args.shipment) === sid);
+  return { live: true as const, anchor };
+}
+
+const DecisionCard: React.FC<{ incidentId: string; trainName: string; assetId: string }> = ({ incidentId, trainName, assetId }) => {
   const result = SOTERIA_BY_INCIDENT[incidentId];
   const d = result?.decision;
+  const chain = useAnchor(assetId);
+  if (chain.live && !chain.anchor) {
+    return (
+      <div className="glass-card command-card">
+        <div className="command-card-head"><span><ShieldCheck size={13} /> Soteria decision</span><span className="command-sub">{trainName} · {incidentId}</span></div>
+        <div className="command-empty" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Loader2 size={12} className="step-spin" /> Assessing: the five roles answer need-to-know questions…
+        </div>
+      </div>
+    );
+  }
   if (!d) {
     return (
       <div className="glass-card command-card">
@@ -71,7 +97,16 @@ const DecisionCard: React.FC<{ incidentId: string; trainName: string }> = ({ inc
         </div>
       </div>
 
-      {d.receiptHash && <div className="command-foot">Agent ID {d.receiptHash}</div>}
+      {d.receiptHash && (
+        <div className="command-foot">
+          Receipt {d.receiptHash}
+          {chain.live && chain.anchor && (
+            <> · anchored on Monad #{chain.anchor.block.toLocaleString('en-US')}{' '}
+              {explorerTx(chain.anchor.tx) && <a href={explorerTx(chain.anchor.tx)} target="_blank" rel="noreferrer" style={{ color: '#836ef9' }}>↗</a>}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -165,10 +200,11 @@ export const IncidentCommandPanel: React.FC = () => {
   if (!activeIncident || !asset) return null;
 
   return (
-    <section className="bottom-metrics-panel command-panel">
-      <DecisionCard incidentId={activeIncident.id} trainName={asset.name.replace('Freight train ', '')} />
+    <section className="bottom-metrics-panel command-panel has-contract">
+      <DecisionCard incidentId={activeIncident.id} trainName={asset.name.replace('Freight train ', '')} assetId={asset.id} />
       <ConsistCard asset={asset} />
       <LineCard asset={asset} symptom={activeIncident.title} />
+      <ContractCard assetId={asset.id} />
     </section>
   );
 };

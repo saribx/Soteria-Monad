@@ -1,0 +1,19 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.31"
+# Monad requires the osaka target
+evm_version = "osaka"
+optimizer = true
+optimizer_runs = 10000
+via_ir = true
+
+[rpc_endpoints]
+local = "http://127.0.0.1:8545"
+testnet = "https://testnet-rpc.monad.xyz"
+mainnet = "https://rpc.monad.xyz"
+
+[lint]
+# report() unpacks fixed-width fields from one word on purpose; payouts are bounded by uint32 caps
+exclude_lints = ["unsafe-typecast"]

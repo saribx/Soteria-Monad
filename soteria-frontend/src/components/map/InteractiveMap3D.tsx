@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { deviceByWagon, onChainEvent } from '../../chain/store';
+import { assetIdOf, caseOfShipment, eur } from '../../chain/cases';
+import '../chain/chain.css';
 import mapboxgl from 'mapbox-gl';
 import {
   Plus,
@@ -397,6 +400,31 @@ export const InteractiveMap3D: React.FC<InteractiveMap3DProps> = ({ isMapOnlyMod
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
+  }, [mapLoaded]);
+
+  // Money and alerts rise from the train the moment they land on chain
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+    const map = mapRef.current;
+    return onChainEvent(e => {
+      if (e.name !== 'Payout' && e.name !== 'SafetyAlert') return;
+      const shipment = e.name === 'Payout' ? e.args.shipment : undefined;
+      const wagon = deviceByWagon(e.args.wagon);
+      const caseId = wagon && wagon.caseId !== 'storm' ? wagon.caseId : caseOfShipment(shipment);
+      if (!caseId) return;
+      const asset = live.current.assets.find(a => a.id === assetIdOf(caseId));
+      const line = asset?.track && measuredCorridor(asset.track.corridorId);
+      if (!asset || !line) return;
+      const el = document.createElement('div');
+      el.className = `payout-float ${e.name === 'SafetyAlert' ? 'alert' : ''}`;
+      el.textContent = e.name === 'Payout'
+        ? `+${eur(Number(e.args.amountEur))}${wagon ? ` · ${wagon.wagon}` : ''}`
+        : `⚠ ${wagon?.wagon ?? ''} ${Number(e.args.code) === 1 ? `${(Number(e.args.value) / 100).toFixed(1)} g` : `${(Number(e.args.value) / 100).toFixed(2)} bar`}`;
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom', offset: [0, -24] })
+        .setLngLat(line.pointAt(headOf(asset)))
+        .addTo(map);
+      setTimeout(() => marker.remove(), 5200);
+    });
   }, [mapLoaded]);
 
   // Rebuild train geometry whenever the fleet data changes (status, edits, pause)

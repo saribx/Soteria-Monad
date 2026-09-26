@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { MonadPill } from '../chain/MonadPill';
 import {
   Search,
-  Wifi,
   Bell,
   Plus,
   Train,
@@ -338,29 +338,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 
         {/* Action icons */}
         <div className="nav-action-icons">
-          {/* WIFI / Latency Indicator: Green / Online with 1ms */}
-          <div
-            title="Latency: 1 ms (IoT & satellite online)"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0 10px',
-              height: '36px',
-              borderRadius: '18px',
-              color: 'var(--accent-emerald)',
-              border: '1px solid rgba(16, 185, 129, 0.35)',
-              background: 'rgba(16, 185, 129, 0.12)',
-              boxShadow: '0 0 12px rgba(16, 185, 129, 0.2)',
-              fontSize: '12px',
-              fontWeight: 600,
-              letterSpacing: '-0.01em',
-              userSelect: 'none'
-            }}
-          >
-            <Wifi size={15} />
-            <span style={{ color: 'var(--accent-emerald)' }}>1ms</span>
-          </div>
+          {/* Monad: current block, readings per second on chain, sensor-to-block latency */}
+          <MonadPill />
 
           {/* Bell Notifications: Opens/Closes the Apple-style Warning & Incidents Sidebar! */}
           <button

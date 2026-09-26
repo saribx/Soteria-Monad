@@ -1,0 +1,51 @@
+{
+  "_comment": "What is monitored on chain and under which terms. Read by relayer/ (devices, bookings) and soteria-frontend/ (sensor panels, thresholds). Only wagons listed here carry a sensor; general goods carry none. Penalty, deadline and liability cap come from data/contracts/<contract>.json.",
+  "_comment_timing": "Demo timings are compressed: a real grace period is minutes, a real standstill slack hours. Temperatures and pressures are realistic; the rate at which a failed unit warms is accelerated (see relayer/src/physics.ts).",
+  "sample_hz": 4,
+  "heartbeat_s": 10,
+  "escalated_hz": 1,
+  "calm_s": 30,
+  "gap_after_s": 30,
+  "max_standstill_s": 20,
+  "challenge_window_s": 45,
+  "cases": {
+    "s1": {
+      "shipment_ref": "SHP-1001",
+      "incident": "INC-1001",
+      "customer": "customer_c1_frischemarkt",
+      "contract": "contract_k1",
+      "ambient_c": 11,
+      "ambient_note": "Donner Pass summit, 2,100 m, late-September morning (10:55 PDT)",
+      "speed_kmh": { "before": 70, "after": 50 },
+      "wagons": {
+        "W02": { "kind": "reefer", "goods": "frozen food", "setpoint_c": -20, "min_c": -25, "max_c": -15, "grace_s": 10, "rate_eur_s": 20, "cap_eur": 6000 },
+        "W05": { "kind": "reefer", "goods": "frozen food", "setpoint_c": -20, "min_c": -25, "max_c": -15, "grace_s": 10, "rate_eur_s": 20, "cap_eur": 6000 }
+      }
+    },
+    "s3": {
+      "shipment_ref": "SHP-1003",
+      "incident": "INC-1003",
+      "customer": "customer_c3_chemiewerk",
+      "contract": "contract_k3",
+      "ambient_c": 12,
+      "ambient_note": "Berlin, late-September evening (20:00 CEST), storm front with rain",
+      "speed_kmh": { "before": 20, "after": 0 },
+      "start_behind_m": 400,
+      "wagons": {
+        "W02": { "kind": "reefer", "goods": "pharmaceuticals", "setpoint_c": 5, "min_c": 2, "max_c": 8, "grace_s": 10, "rate_eur_s": 400, "cap_eur": 12000 },
+        "W04": { "kind": "reefer", "goods": "frozen food", "setpoint_c": -20, "min_c": -25, "max_c": -15, "grace_s": 10, "rate_eur_s": 20, "cap_eur": 6000 },
+        "W05": { "kind": "tank", "goods": "hazardous liquid", "pressure_bar": 4.2, "min_bar": 3.8, "shock_max_g": 2.0 },
+        "W07": { "kind": "reefer", "goods": "frozen food", "setpoint_c": -20, "min_c": -25, "max_c": -15, "grace_s": 10, "rate_eur_s": 20, "cap_eur": 6000 }
+      },
+      "damage_claim": { "wagon": "W03", "amount_eur": 24000, "what": "Side wall ripped open by the tree trunk, general goods, no sensor" }
+    }
+  },
+  "storm": {
+    "wagons": 50,
+    "seconds": 30,
+    "setpoint_c": -20,
+    "min_c": -25,
+    "max_c": -15,
+    "note": "Storm warning for the Berlin-Hamburg corridor: every monitored wagon on it switches to 1 Hz at once"
+  }
+}
