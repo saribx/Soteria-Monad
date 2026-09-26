@@ -4,7 +4,7 @@
 import { writeFileSync } from 'node:fs';
 import { formatEther, maxUint256, parseEther, type Address, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { NETWORK, SPEND_CAP_MON, funderKey } from './config.js';
+import { DEMO, NETWORK, SPEND_CAP_MON, funderKey } from './config.js';
 import { DEPLOYMENTS_FILE, readDeployments } from './deployments.js';
 import { RAIL, Sender, TEUR, balanceOf, budget, call, deploy, refreshFees, rpc, setRailAddress } from './chain.js';
 import { deviceIds, deviceAccount, roleAccount, type Role } from './keys.js';
@@ -15,7 +15,8 @@ const TARGET_MON: Record<string, string> = {
   carrier: '0.6',
   customer: '0.3',
   device: '0.9',
-  storm: '0.25',
+  // one storm run: seconds × 1 Hz readings at the excursion gas limit, 102 gwei, +30 % (STORM_MON overrides, 0 skips)
+  storm: process.env.STORM_MON ?? (DEMO.storm.seconds * DEMO.escalated_hz * 67_000 * 102e9 * 1.3 / 1e18).toFixed(3),
 };
 
 async function main() {
