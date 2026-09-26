@@ -1,0 +1,37 @@
+network testnet · sensor gateway 0x626422741d45C6470d28b93C367DB405671DdC86 · 31.1024 MON
+7 sensors × 14 rounds every 2 s · out of limits rounds 3–11: s1/W02/temp, s3/W02/temp
+estimated gas cost 0.9985 MON (cap MAX_MON=1.0000 MON)
+sensor values: SIMULATED · transactions and MON payments: REAL
+
+round  1       7/7 on chain after 878 ms
+round  2       7/7 on chain after 1022 ms
+round  3 (hot) 7/7 on chain after 839 ms
+   🔥 s1/W02/temp out of limits at -14.2 °C: excursion starts, grace 10 s
+   🔥 s3/W02/temp out of limits at 8.8 °C: excursion starts, grace 10 s
+round  4 (hot) 7/7 on chain after 932 ms
+round  5 (hot) 7/7 on chain after 803 ms
+round  6 (hot) 7/7 on chain after 914 ms
+round  7 (hot) 7/7 on chain after 779 ms
+round  8 (hot) 7/7 on chain after 843 ms
+round  9 (hot) 7/7 on chain after 954 ms
+   💸 s1/W02/temp -13.0 °C → 0.0004 MON to wallet 2 for 2 s (total 0.0004 MON) https://testnet.monadvision.com/tx/0xb528748c71700e4cd504ebba4f69443ed2c9404df781a67bb50e0d550b69c13d
+   💸 s3/W02/temp 10.0 °C → 0.0120 MON to wallet 2 for 3 s (total 0.0120 MON) https://testnet.monadvision.com/tx/0x84d66446c05591d8d639ddb48274d8231c682f511df736bb8c5e98d5a4f43613
+round 10 (hot) 7/7 on chain after 1290 ms
+   💸 s1/W02/temp -12.8 °C → 0.0004 MON to wallet 2 for 2 s (total 0.0008 MON) https://testnet.monadvision.com/tx/0xe805a308e082b6ecb594a2ba07b278a35e395f332b1d05ceed5ee9edf88ffba8
+   💸 s3/W02/temp 10.2 °C → 0.0040 MON to wallet 2 for 1 s (total 0.0160 MON) https://testnet.monadvision.com/tx/0x31fef9d675798a0ad4d31e9dc1805a711d749a8814b9413b7b5889fa8d84051b
+round 11 (hot) 7/7 on chain after 787 ms
+   💸 s1/W02/temp -12.6 °C → 0.0004 MON to wallet 2 for 2 s (total 0.0012 MON) https://testnet.monadvision.com/tx/0x0ef8d44c18a64cefd27c7257f13acfad8797c9dbab8d3a22ed64d69268c00070
+   💸 s3/W02/temp 10.4 °C → 0.0080 MON to wallet 2 for 2 s (total 0.0240 MON) https://testnet.monadvision.com/tx/0x12d03a83c5f517a4f71caeb500e4728f050a69db3fa8286c875c343518c1df36
+round 12       7/7 on chain after 2361 ms
+   💸 s1/W02/temp -19.9 °C → 0.0004 MON to wallet 2 for 2 s (total 0.0016 MON) https://testnet.monadvision.com/tx/0xe8ddd1fb193513cbc97442d66899f4657a3dc5b5dc6a2c52401d0d21ba1d4602
+   ✅ s1/W02/temp back to -19.9 °C: excursion ended, payments stop
+   💸 s3/W02/temp 5.4 °C → 0.0080 MON to wallet 2 for 2 s (total 0.0320 MON) https://testnet.monadvision.com/tx/0xa74fd1a7af99e75e6597f2b800f90b92cf24c369a59e408f9c00b2e4b7e300a3
+   ✅ s3/W02/temp back to 5.4 °C: excursion ended, payments stop
+round 13       7/7 on chain after 959 ms
+round 14       7/7 on chain after 777 ms
+
+=== 98 real sensor transactions in 27.2 s · 35 blocks · up to 6 in one block ===
+sensor data: 980 simulated samples off-chain → 98 on-chain
+MON paid by the contracts to wallet 2 (0x610C0DD8eA0f80e29d942a5977BAf6429E6BC020): 0.0336 MON in 8 payments  (≈ EUR 3.360)
+wallet 2 MON balance: 70.0000 MON → 70.0336 MON  (+0.0336 MON)
+sensor gateway balance 30.2677 MON

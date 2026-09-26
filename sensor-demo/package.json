@@ -1,0 +1,14 @@
+{
+  "name": "sensor-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "tsx --env-file-if-exists=.env deploy.ts",
+    "demo": "tsx --env-file-if-exists=.env demo.ts",
+    "collect": "tsx --env-file-if-exists=.env collect.ts",
+    "dashboard": "tsx dashboard.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "viem": "^2.56.9" },
+  "devDependencies": { "tsx": "^4.23.15", "typescript": "^5.7.3", "@types/node": "^22.10.0" }
+}
