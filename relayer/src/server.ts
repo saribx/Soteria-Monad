@@ -13,9 +13,19 @@ import { Demo, plain } from './scenarios.js';
 const CONTROL_TOKEN = process.env.CONTROL_TOKEN;
 const log = (m: string) => console.log(`${new Date().toLocaleTimeString('en-GB')}  ${m}`);
 
+// On a server the network must be chosen explicitly: 'local' means an anvil
+// on this machine, which a container does not have.
+const onServer = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_ENVIRONMENT_NAME || process.env.RELAYER_KEYS);
+if (onServer && NETWORK.name === 'local') {
+  console.error('MONAD_NETWORK is not set. Set it to mainnet (or testnet) in the service variables.');
+  process.exit(1);
+}
 const deployment = readDeployments()[NETWORK.name];
 if (!deployment) {
-  console.error(`No deployment for ${NETWORK.name}. Run: npm run setup`);
+  console.error(
+    `No ${NETWORK.name} deployment in data/monad/deployments.json. ` +
+      `Run \`npm run setup\` in relayer/ with MONAD_NETWORK=${NETWORK.name} on your machine, then commit and push data/monad/deployments.json.`,
+  );
   process.exit(1);
 }
 setRailAddress(deployment.rail);

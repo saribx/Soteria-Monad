@@ -423,7 +423,7 @@ function startChainFeed() {
       channels.chain.bump();
       setTimeout(connect, 1_000);
     };
-    socket.onerror = () => socket.close();
+    socket.onerror = () => undefined; // close follows and reconnects
   };
   connect();
 }

@@ -19,6 +19,7 @@ export function followFinality(address: Address, onUpdate: (u: FinalityUpdate) =
   let kind: 'monadLogs' | 'logs' = 'monadLogs';
   let socket: WebSocket | undefined;
   let closed = false;
+  let failures = 0;
 
   const connect = () => {
     socket = new WebSocket(NETWORK.ws);
@@ -37,6 +38,7 @@ export function followFinality(address: Address, onUpdate: (u: FinalityUpdate) =
         return;
       }
       if (msg.id === 1) {
+        failures = 0;
         log(`following ${kind} on ${NETWORK.ws}`);
         return;
       }
@@ -50,9 +52,14 @@ export function followFinality(address: Address, onUpdate: (u: FinalityUpdate) =
       onUpdate({ hash: r.transactionHash, state, at: Date.now(), block: Number(BigInt(r.blockNumber)) });
     };
     socket.onclose = () => {
-      if (!closed) setTimeout(connect, 1_000);
+      if (closed) return;
+      failures++;
+      if (failures === 1 || failures % 30 === 0) log(`WebSocket ${NETWORK.ws} closed, reconnecting (${failures})`);
+      setTimeout(connect, Math.min(30_000, 1_000 * failures));
     };
-    socket.onerror = () => socket?.close();
+    // An error is always followed by close, which reconnects. Calling close()
+    // here would re-enter this handler on Node 22 (undici) and overflow the stack.
+    socket.onerror = () => undefined;
   };
   connect();
   return () => {
