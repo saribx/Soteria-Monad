@@ -96,3 +96,11 @@ h2 { margin: 0 0 10px; color: #fff; font-size: 14px; }
 .toast-l { font-size: 13px; font-weight: 600; color: #b9aefc; text-decoration: underline; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .toast { animation: none; transition: none; } }
+
+/* local stage version: payment button + recipient-only display */
+.s-controls button.pay { border: 2px solid #10b981; background: rgba(16, 185, 129, .14); font-size: 16px; }
+.s-controls button.pay:hover:not(:disabled) { background: rgba(16, 185, 129, .26); }
+.s-addr { font-size: 12px !important; overflow-wrap: anywhere; text-align: right; }
+.toast-to { font-size: 13px; color: #e4e4e7; overflow-wrap: anywhere; }
+.toast-to b { color: #fff; font-size: 12px; }
+.toasts { width: min(520px, calc(100vw - 40px)); }

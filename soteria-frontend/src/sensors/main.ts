@@ -53,6 +53,7 @@ app.innerHTML = `
 </header>
 <p class="s-prov"><b>SIMULATED</b> sensor values (4 Hz stream, every 10th sample on-chain, breaches at once) · <b class="real">REAL</b> transactions, contract checks and MON payments (testnet MON)</p>
 <section class="s-controls">
+  <button data-t="s3/W02/temp" class="pay">💸 Execute payment <small>pharma wagon overheats → the contract pays ${short(dep.customer)} · first payment after the 10 s grace</small></button>
   <button data-t="">Run all sensors <small>one reading per contract, all at once</small></button>
   <button data-auto="12">Run 12 rounds <small>all sensors, no incident · ≈ 50 s</small></button>
   <button data-t="s1/W02/temp" class="hot">Overheat · frozen food <small>s1 W02 above −15 °C · ~40 s: grace, paid, recovery</small></button>
@@ -87,10 +88,9 @@ function render() {
   ].map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join("");
   const link = (a: string) => (TESTNET ? `<a href="${addrUrl(a)}" target="_blank" rel="noreferrer">${short(a)}</a>` : short(a));
   $("wallets").innerHTML = `
-    <dt>Wallet 2 · customer ${link(dep.customer)}</dt><dd><b>${monFmt(balances.w2)}</b></dd>
-    <dt>paid to it by these contracts</dt><dd>${monFmt(paidTotal)} <span class="s-note">${eurEq(paidTotal)}</span></dd>
-    <dt>Wallet 1 · carrier ${link(dep.carrier)}</dt><dd>${monFmt(balances.w1)}</dd>
-    <dt>Bonds left in the contracts</dt><dd>${monFmt(balances.escrow)}</dd>`;
+    <dt>Payments go to</dt><dd class="mono s-addr">${TESTNET ? `<a href="${addrUrl(dep.customer)}" target="_blank" rel="noreferrer">${dep.customer}</a>` : dep.customer}</dd>
+    <dt>Balance of this wallet</dt><dd><b>${monFmt(balances.w2)}</b></dd>
+    <dt>Paid to it by the sensor contracts</dt><dd>${monFmt(paidTotal)} <span class="s-note">${eurEq(paidTotal)}</span></dd>`;
   $("tiles").innerHTML = copies.map((c) => {
     const t = tpls.get(c.caseId)!;
     const st = c.state === 2 ? "paying" : c.state === 1 ? "grace" : "in limits";
@@ -100,7 +100,7 @@ function render() {
       <div class="tile-g">${esc(t.goods)} · limit ${esc(t.what)} · grace ${t.graceS} s · ${monFmt(BigInt(t.rateWei))}/s</div>
       <div class="tile-v">${c.last === undefined ? "–" : unit(c.caseId, c.last)}</div>
       <div class="tile-g">paid ${monFmt(c.paid)} of ${monFmt(cap)}</div>
-      <div class="tile-f">${c.lastTx ? (TESTNET ? `<a href="${txUrl(c.lastTx)}" target="_blank" rel="noreferrer">block ${c.lastBlock}</a>` : `block ${c.lastBlock}`) : "no reading yet"} · ${link(c.address)}</div>
+      <div class="tile-f">${c.lastTx ? (TESTNET ? `<a href="${txUrl(c.lastTx)}" target="_blank" rel="noreferrer">last reading · block ${c.lastBlock}</a>` : `block ${c.lastBlock}`) : "no reading yet"}</div>
     </div>`;
   }).join("");
   $("feed").innerHTML = feed.slice(-40).reverse().map((e) => {
@@ -124,15 +124,16 @@ function toast(e: Ev) {
   a.href = txUrl(e.tx);
   a.target = "_blank";
   a.rel = "noreferrer";
-  a.innerHTML = `<span class="toast-k">💸 PAYMENT ON CHAIN</span>
-    <span class="toast-v">${monFmt(e.amount!)} → wallet 2</span>
-    <span class="toast-s">${esc(e.caseId)} · ${esc(t.goods)} · ${e.secs} s out of limits · block ${e.block}</span>
-    <span class="toast-l">View transaction on the explorer ↗</span>`;
+  a.innerHTML = `<span class="toast-k">✅ PAYMENT EXECUTED ON MONAD</span>
+    <span class="toast-v">${monFmt(e.amount!)}</span>
+    <span class="toast-to">to <b class="mono">${dep.customer}</b></span>
+    <span class="toast-s">${esc(t.goods)} · ${e.secs} s out of limits · block ${e.block}</span>
+    <span class="toast-l">View the transaction on the explorer ↗</span>`;
   const box = $("toasts");
   box.prepend(a);
   while (box.children.length > 3) box.lastElementChild!.remove();
-  setTimeout(() => a.classList.add("gone"), 14000);
-  setTimeout(() => a.remove(), 15000);
+  setTimeout(() => a.classList.add("gone"), 30000);
+  setTimeout(() => a.remove(), 31000);
 }
 
 // ---- chain reads ----------------------------------------------------------------------------------------------
