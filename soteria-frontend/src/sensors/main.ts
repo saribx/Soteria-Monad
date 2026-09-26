@@ -66,7 +66,8 @@ app.innerHTML = `
   <div class="s-card"><h2>Wallets</h2><dl id="wallets" class="s-dl"></dl></div>
 </section>
 <section class="s-card"><h2>Contracts</h2><div id="tiles" class="s-tiles"></div></section>
-<section class="s-card"><h2>Chain feed</h2><ol id="feed" class="s-feed"></ol></section>`;
+<section class="s-card"><h2>Chain feed</h2><ol id="feed" class="s-feed"></ol></section>
+<div id="toasts" class="toasts" aria-live="polite"></div>`;
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -114,6 +115,26 @@ function render() {
   $("result").innerHTML = lastResult;
 }
 
+// ---- payment pop-ups: one clickable card per Compensation event seen on chain ----------------------------------
+let live = false; // events from the initial backlog don't pop up, only new ones
+function toast(e: Ev) {
+  const t = tpls.get(e.caseId)!;
+  const a = document.createElement("a");
+  a.className = "toast";
+  a.href = txUrl(e.tx);
+  a.target = "_blank";
+  a.rel = "noreferrer";
+  a.innerHTML = `<span class="toast-k">💸 PAYMENT ON CHAIN</span>
+    <span class="toast-v">${monFmt(e.amount!)} → wallet 2</span>
+    <span class="toast-s">${esc(e.caseId)} · ${esc(t.goods)} · ${e.secs} s out of limits · block ${e.block}</span>
+    <span class="toast-l">View transaction on the explorer ↗</span>`;
+  const box = $("toasts");
+  box.prepend(a);
+  while (box.children.length > 3) box.lastElementChild!.remove();
+  setTimeout(() => a.classList.add("gone"), 14000);
+  setTimeout(() => a.remove(), 15000);
+}
+
 // ---- chain reads ----------------------------------------------------------------------------------------------
 let cursor: bigint | null = null;
 const seen = new Set<string>();
@@ -140,12 +161,13 @@ async function poll() {
         c.last = e.value; c.lastTx = e.tx; c.lastBlock = e.block;
       }
       if (ev.eventName === "ExcursionStarted") c.state = 1;
-      if (ev.eventName === "Compensation") { c.state = 2; c.paid += e.amount!; paidTotal += e.amount!; }
+      if (ev.eventName === "Compensation") { c.state = 2; c.paid += e.amount!; paidTotal += e.amount!; if (live && TESTNET) toast(e); }
       if (ev.eventName === "ExcursionEnded") c.state = 0;
     }
     from = to + 1n;
   }
   cursor = from;
+  live = true;
 }
 
 // The public RPC allows ~15 requests/s per viewer: read contract state one by one, on load and after each round.
@@ -181,7 +203,9 @@ async function round(trigger?: string, label = ""): Promise<boolean> {
   const res = await fetch("/api/sensors", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ trigger }) });
   const r = await res.json();
   if (!r.ok) { lastResult = `${label}Not sent: ${esc(r.error ?? "unknown error")}`; return false; }
-  const paid = (r.payments as { caseId: string; amountWei: string; seconds: number }[]).map((p) => `💸 ${esc(p.caseId)} ${monFmt(BigInt(p.amountWei))} (${p.seconds} s)`);
+  const paid = (r.payments as { caseId: string; amountWei: string; seconds: number; hash: string }[]).map(
+    (p) => `<a href="${txUrl(p.hash)}" target="_blank" rel="noreferrer">💸 ${esc(p.caseId)} ${monFmt(BigInt(p.amountWei))} (${p.seconds} s) ↗</a>`,
+  );
   lastResult = `${label}✓ ${r.confirmed}/${r.sent} real transactions in ${r.totalMs} ms · ${r.blocks.length} block(s), up to ${r.maxPerBlock} in one block` +
     (paid.length ? ` · ${paid.join(" · ")}` : "") + (r.failed ? ` · ${r.failed} failed` : "");
   return true;
