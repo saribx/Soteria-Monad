@@ -1,0 +1,146 @@
+[
+  {
+    "slot": "shipper",
+    "name": "Glaswerk Duisburg",
+    "role": 1,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "WEHhdbAwfmcCdcqo4XwyI2SOY5OKCy2bKboaii8r13Q",
+      "y": "aG1tIETX4BbiiwTGlLE6P5aT8HSke-Q3sRMf5g0k6Tg",
+      "crv": "P-256",
+      "d": "fmTpDqwFO1E8PMgZhHqIvbCdbvwYORk0C5hx8bVDEjU"
+    }
+  },
+  {
+    "slot": "carrierA",
+    "name": "Carrier A (DE)",
+    "role": 2,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "eHuqxpSScleXJiXtzwKCCm_mUxKpLljdEKjM15cI5Fg",
+      "y": "FgklHnZlz_05Dj_In6o8hp_CUpqdiIVi01n-oZhjkno",
+      "crv": "P-256",
+      "d": "WlImzpGy7r2E08PprvrbLFotf5kz2Gh9oCMJRL7qZUk"
+    }
+  },
+  {
+    "slot": "carrierB",
+    "name": "Carrier B (PL)",
+    "role": 2,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "Bmuu-eXpAMGB4u9WZL6fGwUWvNe4coMq01meQzpSXuA",
+      "y": "iNaM7rVkNGEPf8VGkMaJvc0MbTppleAvKduBjDkikvY",
+      "crv": "P-256",
+      "d": "0W5PG8M7-RjZ615V7mIhHKiWNJgohEFq0sW4FzUkLLU"
+    }
+  },
+  {
+    "slot": "receiver",
+    "name": "Receiver Poznań",
+    "role": 3,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "ZptsK_KObO5-jEGS0z-8pehPbeDovtAqa4BsLBuR6go",
+      "y": "-dCrsaKav-ut09Tlg7C1nCpQNLCyYklMWIxtkfEFie4",
+      "crv": "P-256",
+      "d": "DWqOdbSUfoCU85t-Zt3sWntXMu9Ko1taBjHkauU6xFs"
+    }
+  },
+  {
+    "slot": "wagon0",
+    "name": "Wagon 0",
+    "role": 4,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "M223QMHG4MVgy4GAyNpBioJBKYF6WOop-1_NG-kgNlY",
+      "y": "MieoGvUHXbGkUoDN6F1jEuIkC3P3ICh1zQ0ew6Lp8rY",
+      "crv": "P-256",
+      "d": "1sprRRV2xHmxkDXnU-qA7j3kRif2t4z8O3aewr2pjDo"
+    }
+  },
+  {
+    "slot": "wagon1",
+    "name": "Wagon 1",
+    "role": 4,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "TKWLCYkkOtnxy1XaCQAsEl8tTcANJxi3Hxnw6m-qN4U",
+      "y": "_yGcBrOJakSQQWTJiC4nc47Jg4XmluMbdBKtq9MoeWc",
+      "crv": "P-256",
+      "d": "UWM5BN96MTknybxe-bZZZLzWtZIKdGY78jVo5Ejmjdc"
+    }
+  },
+  {
+    "slot": "wagon2",
+    "name": "Wagon 2",
+    "role": 4,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "wxywiEHAWAn6k4ltzLwODRa_2KJ0B0sgg0-z0TbjO6U",
+      "y": "_o5w_YVBA5lU9od50UHdOa6gVCTFjNv25GxadWkxycQ",
+      "crv": "P-256",
+      "d": "Ern5nYZ-7aizrpw_h6F9udUTgXLAHsfKy1rKjyCmHsM"
+    }
+  },
+  {
+    "slot": "wagon3",
+    "name": "Wagon 3",
+    "role": 4,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "KWDJcllKBDYUxKUek85W93y7cs65-5J1vxL9ynBoy6k",
+      "y": "U48B_y6T_qRKJAMy5bWRuO4j0neJf2oe5sTPHTWspN0",
+      "crv": "P-256",
+      "d": "dT_f-ZQWYlQONcyR2awQqAv7NxfqdT_f6bkOJIPMwms"
+    }
+  },
+  {
+    "slot": "wagon4",
+    "name": "Wagon 4",
+    "role": 4,
+    "jwk": {
+      "key_ops": [
+        "sign"
+      ],
+      "ext": true,
+      "kty": "EC",
+      "x": "vttKziUNjCRC67WimukugUaUzUkno_d3ea6vZ0Sb1c0",
+      "y": "JRWLw7TCRRkBsdE8T9ruCaJw7Hg0GbctgOEIV-2XI28",
+      "crv": "P-256",
+      "d": "gwmsqHDBvlz-Y3sPfKSQZ4X_Wlf1_Q8UgQZ5Eik3cqQ"
+    }
+  }
+]

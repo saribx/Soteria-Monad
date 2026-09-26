@@ -14,3 +14,6 @@ dist/
 
 # OSM responses cached by soteria-frontend/scripts/fetch-rail-corridors.mjs
 .overpass-cache/
+
+# Custody (P-256) stack: testnet keys, never commit
+.env.custody
