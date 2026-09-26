@@ -1,0 +1,154 @@
+{
+  "network": "testnet",
+  "kind": "payout-mon",
+  "eurPerMon": 100000,
+  "factory": "0x32b3b3a8fa69ba86e6c20494af5199d7535e823f",
+  "oracle": "0x626422741d45C6470d28b93C367DB405671DdC86",
+  "carrier": "0xe59841AdB191937C04934189AC34f6A5e8FBeA2c",
+  "customer": "0x610C0DD8eA0f80e29d942a5977BAf6429E6BC020",
+  "copies": [
+    {
+      "address": "0xC84370c5442526EE74f6DF1a9c887ED85e908B1d",
+      "caseId": "s1/W02/temp",
+      "index": 0
+    },
+    {
+      "address": "0x0Da1FC9845b1CB47629CB9F181486070A8a8A6F4",
+      "caseId": "s1/W05/temp",
+      "index": 0
+    },
+    {
+      "address": "0x2aD99958386df7B4eC0A299077D75e795262b1c7",
+      "caseId": "s3/W02/temp",
+      "index": 0
+    },
+    {
+      "address": "0xcf10f652b9d92D92A7138A352e8d2B290e35922D",
+      "caseId": "s3/W04/temp",
+      "index": 0
+    },
+    {
+      "address": "0xd2A4c3Bd2C130952f868b7532aDb4A6f569234Fb",
+      "caseId": "s3/W05/pressure",
+      "index": 0
+    },
+    {
+      "address": "0x7F51809e9FeD0d981a48293bD7C054B007CF611C",
+      "caseId": "s3/W05/shock",
+      "index": 0
+    },
+    {
+      "address": "0x46a7EC62d3Af72820275AC9981EA487CDD764f91",
+      "caseId": "s3/W07/temp",
+      "index": 0
+    }
+  ],
+  "templates": [
+    {
+      "caseId": "s1/W02/temp",
+      "goods": "frozen food",
+      "what": "above -15 \u00b0C (overheat)",
+      "trigger": 1,
+      "limit": -150,
+      "bondEur": 6000,
+      "graceS": 10,
+      "rateEur": 20,
+      "center": -200,
+      "spread": 12,
+      "breach": -142,
+      "rateWei": "200000000000000",
+      "capWei": "60000000000000000"
+    },
+    {
+      "caseId": "s1/W05/temp",
+      "goods": "frozen food",
+      "what": "above -15 \u00b0C (overheat)",
+      "trigger": 1,
+      "limit": -150,
+      "bondEur": 6000,
+      "graceS": 10,
+      "rateEur": 20,
+      "center": -200,
+      "spread": 12,
+      "breach": -142,
+      "rateWei": "200000000000000",
+      "capWei": "60000000000000000"
+    },
+    {
+      "caseId": "s3/W02/temp",
+      "goods": "pharmaceuticals",
+      "what": "above 8 \u00b0C (overheat)",
+      "trigger": 1,
+      "limit": 80,
+      "bondEur": 12000,
+      "graceS": 10,
+      "rateEur": 400,
+      "center": 50,
+      "spread": 7,
+      "breach": 88,
+      "rateWei": "4000000000000000",
+      "capWei": "120000000000000000"
+    },
+    {
+      "caseId": "s3/W04/temp",
+      "goods": "frozen food",
+      "what": "above -15 \u00b0C (overheat)",
+      "trigger": 1,
+      "limit": -150,
+      "bondEur": 6000,
+      "graceS": 10,
+      "rateEur": 20,
+      "center": -200,
+      "spread": 12,
+      "breach": -142,
+      "rateWei": "200000000000000",
+      "capWei": "60000000000000000"
+    },
+    {
+      "caseId": "s3/W05/pressure",
+      "goods": "hazardous liquid",
+      "what": "below 3.8 bar (leak)",
+      "trigger": 2,
+      "limit": 38,
+      "bondEur": 9000,
+      "graceS": 0,
+      "rateEur": 9000,
+      "center": 42,
+      "spread": 1,
+      "breach": 31,
+      "rateWei": "90000000000000000",
+      "capWei": "90000000000000000"
+    },
+    {
+      "caseId": "s3/W05/shock",
+      "goods": "hazardous liquid",
+      "what": "above 2 g (impact)",
+      "trigger": 1,
+      "limit": 20,
+      "bondEur": 9000,
+      "graceS": 0,
+      "rateEur": 9000,
+      "center": 4,
+      "spread": 3,
+      "breach": 34,
+      "rateWei": "90000000000000000",
+      "capWei": "90000000000000000"
+    },
+    {
+      "caseId": "s3/W07/temp",
+      "goods": "frozen food",
+      "what": "above -15 \u00b0C (overheat)",
+      "trigger": 1,
+      "limit": -150,
+      "bondEur": 6000,
+      "graceS": 10,
+      "rateEur": 20,
+      "center": -200,
+      "spread": 12,
+      "breach": -142,
+      "rateWei": "200000000000000",
+      "capWei": "60000000000000000"
+    }
+  ],
+  "fromBlock": "65867133"
+}

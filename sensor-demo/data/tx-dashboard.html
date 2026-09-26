@@ -1,0 +1,1740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sensor Transactions</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #7b7a74; --rule: #e4e3de; --grid: #ecebe6;
+  --series: #2a78d6; --critical: #d03b3b; --good: #0ca30c; --accent-soft: #e8f0fb; --crit-soft: #fbeaea; --good-soft: #e7f5e7;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8e8d85; --rule: #2e2e2c; --grid: #262624;
+    --series: #3987e5; --accent-soft: #1b2a3f; --crit-soft: #3a1d1d; --good-soft: #16301a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.5 var(--sans); padding-inline: 20px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 20px; }
+h1 { margin: 0; font-size: 26px; letter-spacing: -0.01em; }
+h2 { margin: 0 0 12px; font-size: 16px; }
+p { margin: 0; }
+a { color: var(--series); }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.muted { color: var(--ink-2); }
+.small { font-size: 12px; color: var(--ink-3); }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; min-width: 0; }
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.tag { font: 600 11px var(--mono); letter-spacing: .06em; padding: 3px 8px; border-radius: 4px; background: var(--accent-soft); color: var(--series); }
+
+/* money to wallet 2 */
+.money { display: grid; grid-template-columns: minmax(240px, 1fr) 2fr; gap: 20px; border: 2px solid var(--good); }
+.big { font-size: 44px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 18px; font-weight: 600; color: var(--ink-2); }
+.check { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; color: var(--good); background: var(--good-soft); padding: 3px 8px; border-radius: 4px; }
+.pay { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pay th { text-align: left; font: 600 11px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); padding: 6px 8px; border-bottom: 1px solid var(--rule); }
+.pay td { padding: 8px; border-bottom: 1px solid var(--rule); vertical-align: top; font-variant-numeric: tabular-nums; }
+.pay tr:last-child td { border-bottom: 0; }
+.amt { font-weight: 700; white-space: nowrap; }
+.flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.flow .arrow { color: var(--good); font-weight: 700; }
+.hint { font-size: 12px; color: var(--ink-2); border-top: 1px dashed var(--rule); padding-top: 10px; margin-top: 10px; }
+
+/* tiles */
+.tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.tile span { font-size: 12px; color: var(--ink-2); }
+.tile b { font-size: 24px; font-variant-numeric: tabular-nums; }
+
+/* charts */
+.charts { display: grid; grid-template-columns: 1fr; gap: 20px; }
+svg text { fill: var(--ink-2); font: 11px var(--sans); }
+.multiples { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.mult { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 10px 4px; }
+.mult h3 { margin: 0; font-size: 13px; }
+.mult .sub { font-size: 11px; color: var(--ink-3); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); margin-bottom: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i.line { width: 16px; height: 0; border-radius: 0; border-top: 2px dashed var(--ink-3); vertical-align: 3px; }
+#tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); z-index: 10; max-width: 320px; }
+
+/* history */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+.filters select, .filters input { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); }
+.filters input { min-width: 220px; }
+.tablewrap { overflow-x: auto; }
+table.hist { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 860px; }
+.hist th { position: sticky; top: 0; background: var(--surface); text-align: left; font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); padding: 8px; border-bottom: 1px solid var(--rule); }
+.hist td { padding: 7px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hist tr.pay-row td { background: var(--crit-soft); }
+.hist tr.refund-row td { background: var(--good-soft); }
+.pill { font: 600 10.5px var(--mono); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--rule); }
+.pill.ok { color: var(--good); border-color: currentColor; }
+:focus-visible { outline: 2px solid var(--series); outline-offset: 2px; }
+@media (max-width: 900px) {
+  .money { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1>Sensor transactions</h1>
+      <p class="muted">Every transaction of the sensor-contract demo, read back from <b>Monad testnet</b>. <span id="collected"></span></p>
+    </div>
+    <span class="tag">REAL · chain 10143</span>
+  </header>
+
+  <section class="card money" aria-labelledby="money-h">
+    <div>
+      <h2 id="money-h">Money to wallet 2 (customer)</h2>
+      <p class="mono" id="custAddr"></p>
+      <p class="big" id="custTotal"></p>
+      <p style="margin-top:8px"><span class="check" id="custCheck"></span></p>
+      <p class="hint">Paid in native testnet MON straight from the sensor contracts, so it shows up in any wallet without importing a token.</p>
+    </div>
+    <div>
+      <table class="pay" aria-label="Payments to wallet 2">
+        <thead><tr><th>When</th><th>Reading that paid</th><th>Amount</th><th>Transaction</th></tr></thead>
+        <tbody id="payRows"></tbody>
+      </table>
+      <p class="hint" id="refundLine"></p>
+    </div>
+  </section>
+
+  <section class="tiles" id="tiles" aria-label="Totals"></section>
+
+  <section class="card">
+    <h2>Transactions per block</h2>
+    <p class="small" style="margin-bottom:8px">Blocks that contain demo transactions, in chain order. Hover a bar for details.</p>
+    <div id="bars"></div>
+  </section>
+
+  <section class="card">
+    <h2>Sensor readings by condition</h2>
+    <div class="legend"><span><i style="background:var(--series)"></i>reading sent on-chain</span><span><i style="background:var(--critical)"></i>reading that paid MON to wallet 2</span><span><i class="line"></i>limit</span></div>
+    <p class="small" style="margin-bottom:10px">Sensor values are simulated (every 10th sample of a 4 Hz stream); each dot is a real transaction. x = order on chain.</p>
+    <div class="multiples" id="mults"></div>
+  </section>
+
+  <section class="card">
+    <h2>Transaction history</h2>
+    <div class="filters">
+      <label>Type <select id="fKind"><option value="">all</option></select></label>
+      <label>Condition <select id="fCase"><option value="">all</option></select></label>
+      <input id="fText" type="search" placeholder="Search hash, address, block…" aria-label="Search">
+      <span class="small" id="fCount"></span>
+    </div>
+    <div class="tablewrap">
+      <table class="hist">
+        <thead><tr><th>Time (UTC)</th><th>Block</th><th>Type</th><th>Condition</th><th>Reading</th><th>MON paid</th><th>Fee</th><th>Status</th><th>Transaction</th></tr></thead>
+        <tbody id="histRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="small">Sensor values are simulated; transactions, contract checks and MON payments are real (testnet MON).
+  Regenerate: <span class="mono">npx tsx --env-file=.env collect.ts && npx tsx dashboard.ts</span></p>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const D = {
+ "collectedAt": "2026-09-26T14:02:11.811Z",
+ "rpc": "https://testnet-rpc.monad.xyz",
+ "deployment": {
+  "network": "testnet",
+  "kind": "payout-mon",
+  "eurPerMon": 100000,
+  "factory": "0x32b3b3a8fa69ba86e6c20494af5199d7535e823f",
+  "oracle": "0x626422741d45C6470d28b93C367DB405671DdC86",
+  "carrier": "0xe59841AdB191937C04934189AC34f6A5e8FBeA2c",
+  "customer": "0x610C0DD8eA0f80e29d942a5977BAf6429E6BC020",
+  "copies": [
+   {
+    "address": "0xC84370c5442526EE74f6DF1a9c887ED85e908B1d",
+    "caseId": "s1/W02/temp",
+    "index": 0
+   },
+   {
+    "address": "0x0Da1FC9845b1CB47629CB9F181486070A8a8A6F4",
+    "caseId": "s1/W05/temp",
+    "index": 0
+   },
+   {
+    "address": "0x2aD99958386df7B4eC0A299077D75e795262b1c7",
+    "caseId": "s3/W02/temp",
+    "index": 0
+   },
+   {
+    "address": "0xcf10f652b9d92D92A7138A352e8d2B290e35922D",
+    "caseId": "s3/W04/temp",
+    "index": 0
+   },
+   {
+    "address": "0xd2A4c3Bd2C130952f868b7532aDb4A6f569234Fb",
+    "caseId": "s3/W05/pressure",
+    "index": 0
+   },
+   {
+    "address": "0x7F51809e9FeD0d981a48293bD7C054B007CF611C",
+    "caseId": "s3/W05/shock",
+    "index": 0
+   },
+   {
+    "address": "0x46a7EC62d3Af72820275AC9981EA487CDD764f91",
+    "caseId": "s3/W07/temp",
+    "index": 0
+   }
+  ],
+  "templates": [
+   {
+    "caseId": "s1/W02/temp",
+    "goods": "frozen food",
+    "what": "above -15 °C (overheat)",
+    "trigger": 1,
+    "limit": -150,
+    "bondEur": 6000,
+    "graceS": 10,
+    "rateEur": 20,
+    "center": -200,
+    "spread": 12,
+    "breach": -142,
+    "rateWei": "200000000000000",
+    "capWei": "60000000000000000"
+   },
+   {
+    "caseId": "s1/W05/temp",
+    "goods": "frozen food",
+    "what": "above -15 °C (overheat)",
+    "trigger": 1,
+    "limit": -150,
+    "bondEur": 6000,
+    "graceS": 10,
+    "rateEur": 20,
+    "center": -200,
+    "spread": 12,
+    "breach": -142,
+    "rateWei": "200000000000000",
+    "capWei": "60000000000000000"
+   },
+   {
+    "caseId": "s3/W02/temp",
+    "goods": "pharmaceuticals",
+    "what": "above 8 °C (overheat)",
+    "trigger": 1,
+    "limit": 80,
+    "bondEur": 12000,
+    "graceS": 10,
+    "rateEur": 400,
+    "center": 50,
+    "spread": 7,
+    "breach": 88,
+    "rateWei": "4000000000000000",
+    "capWei": "120000000000000000"
+   },
+   {
+    "caseId": "s3/W04/temp",
+    "goods": "frozen food",
+    "what": "above -15 °C (overheat)",
+    "trigger": 1,
+    "limit": -150,
+    "bondEur": 6000,
+    "graceS": 10,
+    "rateEur": 20,
+    "center": -200,
+    "spread": 12,
+    "breach": -142,
+    "rateWei": "200000000000000",
+    "capWei": "60000000000000000"
+   },
+   {
+    "caseId": "s3/W05/pressure",
+    "goods": "hazardous liquid",
+    "what": "below 3.8 bar (leak)",
+    "trigger": 2,
+    "limit": 38,
+    "bondEur": 9000,
+    "graceS": 0,
+    "rateEur": 9000,
+    "center": 42,
+    "spread": 1,
+    "breach": 31,
+    "rateWei": "90000000000000000",
+    "capWei": "90000000000000000"
+   },
+   {
+    "caseId": "s3/W05/shock",
+    "goods": "hazardous liquid",
+    "what": "above 2 g (impact)",
+    "trigger": 1,
+    "limit": 20,
+    "bondEur": 9000,
+    "graceS": 0,
+    "rateEur": 9000,
+    "center": 4,
+    "spread": 3,
+    "breach": 34,
+    "rateWei": "90000000000000000",
+    "capWei": "90000000000000000"
+   },
+   {
+    "caseId": "s3/W07/temp",
+    "goods": "frozen food",
+    "what": "above -15 °C (overheat)",
+    "trigger": 1,
+    "limit": -150,
+    "bondEur": 6000,
+    "graceS": 10,
+    "rateEur": 20,
+    "center": -200,
+    "spread": 12,
+    "breach": -142,
+    "rateWei": "200000000000000",
+    "capWei": "60000000000000000"
+   }
+  ],
+  "fromBlock": "65867133"
+ },
+ "balances": {
+  "customerMon": 70.0736,
+  "carrierMon": 41.99567778,
+  "atBlock": "65869083"
+ },
+ "txs": [
+  {
+   "hash": "0xda98674dc91746275a2f99807a970cfc4bd301428cbe40ffcfa73080468308ad",
+   "block": "65867137",
+   "time": 1790430691,
+   "status": "success",
+   "feeMon": "0.154023774",
+   "kind": "Create sensor contracts"
+  },
+  {
+   "hash": "0xe70a6fb85552d6e0e2b942c15c725c85ffc72eec305df20c6889dceaf35fb39c",
+   "block": "65867262",
+   "time": 1790430731,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -191
+  },
+  {
+   "hash": "0x8295de37ec99d9ba7630172acabc68d4e1b270b21eb4da083a51266e884075ae",
+   "block": "65867262",
+   "time": 1790430731,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -192
+  },
+  {
+   "hash": "0x320c3ec9c267502ede6706bf0478a7731a6b00f4bb9c5d8a5da115ac757a47bb",
+   "block": "65867262",
+   "time": 1790430731,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 56
+  },
+  {
+   "hash": "0xae28d738b492247f1cfc7d03d092078a29e8d914ff9eb9f169c9e3fac3c26998",
+   "block": "65867262",
+   "time": 1790430731,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -208
+  },
+  {
+   "hash": "0x59c9b07b8a8541c8204255487f8ecb653171dddbb08ee9b38769a0d25c25424f",
+   "block": "65867263",
+   "time": 1790430732,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 43
+  },
+  {
+   "hash": "0xee2f814801930ac813324f23275665575f534894cff000681ed15952f08d1872",
+   "block": "65867263",
+   "time": 1790430732,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 7
+  },
+  {
+   "hash": "0x5b0ba4bc7cab0ef1efe2d163edb4aced095c8b712940bbd2a5c2f3ff8d5ad5d7",
+   "block": "65867263",
+   "time": 1790430732,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -209
+  },
+  {
+   "hash": "0xea1b048ea4bce8dca2d834faafa30ded4865d9d1d782d27dc78e79438eb0a5dc",
+   "block": "65867268",
+   "time": 1790430733,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -210
+  },
+  {
+   "hash": "0xfd89e6e35fc246372533106ba73c1a5172240aa789d6e0a445dde908de045cea",
+   "block": "65867268",
+   "time": 1790430733,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -210
+  },
+  {
+   "hash": "0x7e1cd1b427da00772665156ed4fb55236a5061a474665d77012a0398b3b63f81",
+   "block": "65867269",
+   "time": 1790430733,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 57
+  },
+  {
+   "hash": "0x393186e61fb7982ac5d9aac4185b5a0cd6807084ef4820f48f5a9ca28909049a",
+   "block": "65867269",
+   "time": 1790430733,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -208
+  },
+  {
+   "hash": "0xae6198dfb28103d9e18a1ae147008dccd8be9546569ac8b79c838f79bbf6e061",
+   "block": "65867269",
+   "time": 1790430733,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 43
+  },
+  {
+   "hash": "0xdf2acf111d9c92c377cf7e86fac78ed90a73c06a6062a970cf2dab1ff35bc4eb",
+   "block": "65867270",
+   "time": 1790430734,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 5
+  },
+  {
+   "hash": "0x08b4208baefce8c1b5ddbd7333386eb0edee701a01e597077d1fc29492f2741c",
+   "block": "65867270",
+   "time": 1790430734,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -189
+  },
+  {
+   "hash": "0x4493cd16d0b7690770a9e87dbba7037c97233ff3d20ff5fded817f11254b2c30",
+   "block": "65867274",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Excursion starts",
+   "caseId": "s1/W02/temp",
+   "value": -142
+  },
+  {
+   "hash": "0xf048e12a1151b58e7cc5346254c1a566074cd7c00e9bdf5d37e8ff6ff0274140",
+   "block": "65867275",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -205
+  },
+  {
+   "hash": "0xa9bf21bb59c25421a46af6d0bef0b1ba34953f2d50de58939c708f2f9dfc9a93",
+   "block": "65867275",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Excursion starts",
+   "caseId": "s3/W02/temp",
+   "value": 88
+  },
+  {
+   "hash": "0x1c74dfcee201aa74f58ebba44b450b38647b7b8e3a91a1981af2e5ff7064e640",
+   "block": "65867275",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -201
+  },
+  {
+   "hash": "0x150cce989f5fbccea983ef28e381bb5bf9df2449478c9d634bc793429653e075",
+   "block": "65867275",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0xe1c4bf6b1930a2cc6370877493561d73ed3be402ad30834df424e04c2ef288aa",
+   "block": "65867276",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 5
+  },
+  {
+   "hash": "0x8eb14b105167ade9c615a152e918241e6a50ad81ed23583085570381e8cf5f04",
+   "block": "65867276",
+   "time": 1790430735,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -194
+  },
+  {
+   "hash": "0x04c54e0a2b6ea5f6aaca7cad76284f78815f0dac61f3ac305502415cb8c0ef31",
+   "block": "65867281",
+   "time": 1790430737,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -140
+  },
+  {
+   "hash": "0x04e56de0869c6f4b5d52df497763fcad8c9f9a5ca07b8a5a8bcb58e9c9d235fb",
+   "block": "65867281",
+   "time": 1790430737,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -201
+  },
+  {
+   "hash": "0xed3fd2bb939c7900cdf42efc9f40ba4a182f77893b497222fe36e758e182f19e",
+   "block": "65867282",
+   "time": 1790430737,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 90
+  },
+  {
+   "hash": "0x813fb60988be38c27ec0cdf34bd39d253acdac90189e3efdddc68673d954a1d6",
+   "block": "65867282",
+   "time": 1790430737,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -207
+  },
+  {
+   "hash": "0xf1cc8cca0bc3c4d41a29fac4342e8a2208acfd4d0d78122f92e269aa0bbcd316",
+   "block": "65867282",
+   "time": 1790430737,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0xccf5002d290d4e645e68495fca1bed23e855ed89bba82224101339101e0913d5",
+   "block": "65867282",
+   "time": 1790430737,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 4
+  },
+  {
+   "hash": "0xff20ac1dc8cf5228e2548696aa92cdeeeb41171492df14769bcaf1034874704e",
+   "block": "65867283",
+   "time": 1790430738,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -210
+  },
+  {
+   "hash": "0xf70b720975870049866891e34f50fe4018685a873386315ae2ca89998f0be297",
+   "block": "65867288",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -138
+  },
+  {
+   "hash": "0x07e3f2bc46addba73a671a352aa3be275a0a06b0c98dc5bada10cd518c9a33d6",
+   "block": "65867288",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -210
+  },
+  {
+   "hash": "0x65972f720d56dcca23e9aaca7c714387c3f95204f8f133aeb1c403554ef07ab4",
+   "block": "65867288",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 92
+  },
+  {
+   "hash": "0x154a679c883ca2d8f96cf240443ef72929f3b2dff4a042e5d19bb3ba4091de95",
+   "block": "65867288",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -196
+  },
+  {
+   "hash": "0x99823965dedb156dd180f3f26cff793be43de43a1cc05abb50d40a2803b91f42",
+   "block": "65867289",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x845fe6f6f2f3676096028e020485cd9bcb858d9508a06ec95d85ad8922ab3ad5",
+   "block": "65867289",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 6
+  },
+  {
+   "hash": "0x08e0b417bf8e3b2c54eb888ca35bfc94afffe96733edb60de1b243f3f0416463",
+   "block": "65867289",
+   "time": 1790430739,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -191
+  },
+  {
+   "hash": "0x14d48cedd72e1de84b6e77c115577a05b7ca9e78cca2e4430c058c418b12222e",
+   "block": "65867295",
+   "time": 1790430741,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -136
+  },
+  {
+   "hash": "0x492de6e0b6b94ee1a4cda9cb91afa60d27e70247370974775260af271855a714",
+   "block": "65867295",
+   "time": 1790430741,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -199
+  },
+  {
+   "hash": "0x33a0bc2e8d0b03e2f12331b9510a9d1a63cf88bae8e05aba343abfadb4d07300",
+   "block": "65867295",
+   "time": 1790430741,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 94
+  },
+  {
+   "hash": "0x3e673267d2fad794fade0a038b84190fc1f2e41742c486aa1b58c73534d3bd67",
+   "block": "65867295",
+   "time": 1790430741,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -196
+  },
+  {
+   "hash": "0x4dde2dc978ae60c42f3c93146ca173976b7ce1ef8bad4d09b280f138b8068f4a",
+   "block": "65867295",
+   "time": 1790430741,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0xc8904bbd5e70ab5c6ccfe65b58ef5b2b7ab50ec31c4fc4b8d5c8e983fb09ab74",
+   "block": "65867296",
+   "time": 1790430742,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 3
+  },
+  {
+   "hash": "0x9778746d571772aa99f8a57c74adb9e1afccc85d4893b77f5aa448c271ecceea",
+   "block": "65867296",
+   "time": 1790430742,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -195
+  },
+  {
+   "hash": "0x0433df5a27c5513b21a98e70b4992020761d83c420dab22ef56fd4708d19016f",
+   "block": "65867301",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -134
+  },
+  {
+   "hash": "0xfb9578ccbf3d62dc8ab6ae56776d588e361ea2ff0b1833183ba29c1728ca7760",
+   "block": "65867301",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -203
+  },
+  {
+   "hash": "0xfd68f05c4bebd3e72c2b5938c40e2b06bd9cd099aaa46a87da982dc49f007c60",
+   "block": "65867302",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 96
+  },
+  {
+   "hash": "0xec19b1451a4710c52730311df803e6e12f7928e5b8f97e50f42376e8de130db6",
+   "block": "65867302",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -195
+  },
+  {
+   "hash": "0x2e0326f88a7bb79e3824ebda85beaee47b1df85f1ab07852c15f482daf6435cd",
+   "block": "65867302",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 41
+  },
+  {
+   "hash": "0xda01349f2658a7c9da15729c336056b334598c26a5d4e13d1f90415614d434e8",
+   "block": "65867302",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 1
+  },
+  {
+   "hash": "0x86413e2f16bfcf038064ed4b40381153ab05112ebbb95040e644ef7330f00744",
+   "block": "65867302",
+   "time": 1790430743,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -197
+  },
+  {
+   "hash": "0xbde21fff57eb0605b92e914f0fdbfb1f88751ec0018071e157081b2e40359228",
+   "block": "65867308",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -132
+  },
+  {
+   "hash": "0x5ba2019d5b8afc4d7c26494568a29ca5dfbe3adee7558d1c1dbcc77490e2135a",
+   "block": "65867308",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -201
+  },
+  {
+   "hash": "0xee2f1cf271f48c61133e2d1651f09b9363f5a8ad0f708dc37dfcdf5d9d309f83",
+   "block": "65867308",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 98
+  },
+  {
+   "hash": "0x13c4e1b2c4fa339b5170e18140be331f01c7127cc5fb4d41ba8dfa1ded02e274",
+   "block": "65867308",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -209
+  },
+  {
+   "hash": "0xf772e6d096be02392078b8e0463a55c7ce233bcc3addff858383b059271947b5",
+   "block": "65867308",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x49130fb0ba89d518d6070334fc72df166fdf222c865471a7dea080508dbe04e0",
+   "block": "65867309",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 2
+  },
+  {
+   "hash": "0xec4780d5734e757940d57f7e1533e10ae1c4110d4cedc3b210f23e121e025332",
+   "block": "65867309",
+   "time": 1790430745,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -212
+  },
+  {
+   "hash": "0xb528748c71700e4cd504ebba4f69443ed2c9404df781a67bb50e0d550b69c13d",
+   "block": "65867314",
+   "time": 1790430747,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s1/W02/temp",
+   "value": -130,
+   "paidMon": 0.0004,
+   "seconds": 2
+  },
+  {
+   "hash": "0x2dfe14a729d0d8ba24bf330f9522977aaf2f3a2556768e2895480a125808f66d",
+   "block": "65867316",
+   "time": 1790430748,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -208
+  },
+  {
+   "hash": "0x84d66446c05591d8d639ddb48274d8231c682f511df736bb8c5e98d5a4f43613",
+   "block": "65867316",
+   "time": 1790430748,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s3/W02/temp",
+   "value": 100,
+   "paidMon": 0.012,
+   "seconds": 3
+  },
+  {
+   "hash": "0x6ef141d2eb43541a70ddf7b50106beaedc772c5043c6d88798d02dfd1441c983",
+   "block": "65867316",
+   "time": 1790430748,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -190
+  },
+  {
+   "hash": "0xc8286d092972823259a4dbdc82f8d1b689726b0d2998f2950e5e7a60af4b70e3",
+   "block": "65867316",
+   "time": 1790430748,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0xb07f5e84c992df7956c4b0a6ae1c869780b6d323be613f6cb93470942f943d18",
+   "block": "65867316",
+   "time": 1790430748,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 5
+  },
+  {
+   "hash": "0x7ac2aa246f513acde9dbe209df461ce1722c113e0d7e318be25615792bad17e4",
+   "block": "65867316",
+   "time": 1790430748,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -188
+  },
+  {
+   "hash": "0xe805a308e082b6ecb594a2ba07b278a35e395f332b1d05ceed5ee9edf88ffba8",
+   "block": "65867321",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s1/W02/temp",
+   "value": -128,
+   "paidMon": 0.0004,
+   "seconds": 2
+  },
+  {
+   "hash": "0x1ddae6b7fb75e3faf07013f2a1a7d7a59b8a15483df9660d12d05116fedc3cc8",
+   "block": "65867321",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -201
+  },
+  {
+   "hash": "0x31fef9d675798a0ad4d31e9dc1805a711d749a8814b9413b7b5889fa8d84051b",
+   "block": "65867322",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s3/W02/temp",
+   "value": 102,
+   "paidMon": 0.004,
+   "seconds": 1
+  },
+  {
+   "hash": "0x8049c95168a10734cb40bbcff2b79f2554fe04d7e12f33999f51bea39781aed2",
+   "block": "65867322",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -199
+  },
+  {
+   "hash": "0x58919eb14fae1f044f62efa6e016401ffa819a8d4c9ae19d5620dfb372524c92",
+   "block": "65867322",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x974785d83773a85bc6a25e58744d23ae924ccf693c4431e15464d9c95e0498b8",
+   "block": "65867322",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 4
+  },
+  {
+   "hash": "0xa9250e8b5b98a2ed287a174fea2902406ddedb0842593da89c3247652bf27eca",
+   "block": "65867322",
+   "time": 1790430749,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -201
+  },
+  {
+   "hash": "0x0ef8d44c18a64cefd27c7257f13acfad8797c9dbab8d3a22ed64d69268c00070",
+   "block": "65867327",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s1/W02/temp",
+   "value": -126,
+   "paidMon": 0.0004,
+   "seconds": 2
+  },
+  {
+   "hash": "0x281b15e62188832f83ab70a6117fb6fe46d541274e8ee1963bbca2461aa0e542",
+   "block": "65867328",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -203
+  },
+  {
+   "hash": "0x12d03a83c5f517a4f71caeb500e4728f050a69db3fa8286c875c343518c1df36",
+   "block": "65867328",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s3/W02/temp",
+   "value": 104,
+   "paidMon": 0.008,
+   "seconds": 2
+  },
+  {
+   "hash": "0x062c186801067a7ac8b4deff794bd9524c6bcc7c700d0a9b3aad23024419547f",
+   "block": "65867328",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -194
+  },
+  {
+   "hash": "0x9498c65d8ce913e4ef9299a5e2a7c04a7c2b133a984b59e15e0cf4536acb1f48",
+   "block": "65867328",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x74edc4da6533a88327378c1fa75f0603803eb19f8687010cdfd7f32fa2cf466c",
+   "block": "65867329",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 2
+  },
+  {
+   "hash": "0x1e86ec59b21fd55b6c0e27310c22cd54c712f4ce457d39fa225f329ebfcbb36d",
+   "block": "65867329",
+   "time": 1790430751,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -205
+  },
+  {
+   "hash": "0xe8ddd1fb193513cbc97442d66899f4657a3dc5b5dc6a2c52401d0d21ba1d4602",
+   "block": "65867334",
+   "time": 1790430753,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s1/W02/temp",
+   "value": -199,
+   "paidMon": 0.0004,
+   "seconds": 2
+  },
+  {
+   "hash": "0xb3a072fa97fc11a75f06d53c4d355f12fb12aa296fbb7396c85157b473c5f419",
+   "block": "65867334",
+   "time": 1790430753,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -197
+  },
+  {
+   "hash": "0xa74fd1a7af99e75e6597f2b800f90b92cf24c369a59e408f9c00b2e4b7e300a3",
+   "block": "65867335",
+   "time": 1790430753,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s3/W02/temp",
+   "value": 54,
+   "paidMon": 0.008,
+   "seconds": 2
+  },
+  {
+   "hash": "0xdf2ddff48d982a0e2bab5cb29aeabb949f2cedaebb8e909c06fbfee0be4e7a0a",
+   "block": "65867335",
+   "time": 1790430753,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -204
+  },
+  {
+   "hash": "0x9519feab8c06da987854514ce14735d5eb3defb40bf3a82bcdc5d3045b83f2f6",
+   "block": "65867340",
+   "time": 1790430755,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x095eb28daf1e8cf0f72cca8cfccd56292b9e01c30d8e5a285d691d2d610020f4",
+   "block": "65867340",
+   "time": 1790430755,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 6
+  },
+  {
+   "hash": "0xfcfc9367cd7b3182043e84502751012b849ee6013c509d6780b2979bd629643c",
+   "block": "65867340",
+   "time": 1790430755,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -195
+  },
+  {
+   "hash": "0x47e0cffd8a00695f24d454ff6242afb4a2981c73bc7ddfa1404b141f204767ef",
+   "block": "65867342",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -210
+  },
+  {
+   "hash": "0x45c1cf09c66e6356afc6ebab54aaf0afa21fc062851727f4b25d52476ec159a2",
+   "block": "65867342",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -207
+  },
+  {
+   "hash": "0x7c43fcc71640a59a3ad55c1415b55e897bf8850a47f3fdd3382796c2408d55a2",
+   "block": "65867343",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 50
+  },
+  {
+   "hash": "0xcc3c41fcb797b7bd29c5d5222295eae5db82318733427c2043b5b10c5c5f51be",
+   "block": "65867343",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -200
+  },
+  {
+   "hash": "0xc24b8e1b1f06fc5690126965c9497571f611040ce25449b5319ea410a3ee034d",
+   "block": "65867343",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 41
+  },
+  {
+   "hash": "0x4119a3723886720047d509530b85db0336ad5227670464df1880ce9ac0773a8a",
+   "block": "65867343",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 5
+  },
+  {
+   "hash": "0x799acac48f3f6ab81e7691dab9cde86c8c17a0d5a7d3b55b3023710dc052fd4b",
+   "block": "65867344",
+   "time": 1790430756,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -211
+  },
+  {
+   "hash": "0xb997e6c16d1ffbbeb38a6c6924221ca4a3d0a5b1746a92dc3d2c0f9b71f45f5a",
+   "block": "65867348",
+   "time": 1790430757,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -201
+  },
+  {
+   "hash": "0x9afdf96b79dff536b02c5bfcd06fe6cb67875221a25e5b10692c9294c63f609f",
+   "block": "65867349",
+   "time": 1790430758,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -208
+  },
+  {
+   "hash": "0xe64e64c1589a619b65b1ae89ae38dc123911d6ee6713b70f794f40af8a183ee0",
+   "block": "65867349",
+   "time": 1790430758,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 46
+  },
+  {
+   "hash": "0xc90b5531d26e1cc1095789df64e147bd4d4c62e07114fc8e55bf67f7905e0060",
+   "block": "65867349",
+   "time": 1790430758,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -198
+  },
+  {
+   "hash": "0x347a6f2fa527879de20dd50163c5120cc986d18c83646e7b4538273dfac19c74",
+   "block": "65867349",
+   "time": 1790430758,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x379aa2b6a4045ee5f132109d6b62fbefa2ee8a22a3f36ec5e7ad72bc921f7fe2",
+   "block": "65867350",
+   "time": 1790430758,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 6
+  },
+  {
+   "hash": "0xe112191e29948b8e707dc6d3b15a93bfbb1a0e96d294709484210289de7645f2",
+   "block": "65867350",
+   "time": 1790430758,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -201
+  },
+  {
+   "hash": "0x82250bdd20551e3ec810606c8c55f9b3b6610232c840b6ee9fa14f97c75d1963",
+   "block": "65867819",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -188
+  },
+  {
+   "hash": "0xf0c1bf8e6e527b478fcb22ecb215b617f68fe221212249d577345ec74b8bf3ae",
+   "block": "65867819",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -203
+  },
+  {
+   "hash": "0x1d67fdd86f1acd707198c920a8e7cc84792a0b02aa7f8acbddc3d2ef621b9022",
+   "block": "65867819",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Excursion starts",
+   "caseId": "s3/W02/temp",
+   "value": 89
+  },
+  {
+   "hash": "0xfb0b2b49865007cde0d6bdae862a8bb8b41ce73f7c6c4d728743a9bb8d307e2b",
+   "block": "65867820",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -190
+  },
+  {
+   "hash": "0xceb1bdb6525abfc8c48570ecd727885893b90239a0d0e256d92f55d0960c5a3e",
+   "block": "65867820",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 43
+  },
+  {
+   "hash": "0x56d129148297c0f001014c5cc182a20749d67faf7afc9396a828531fe370bf47",
+   "block": "65867820",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 1
+  },
+  {
+   "hash": "0x0f2ac57adef8876012ba1abc0a4c88f7debadc8d00fd9ded2d0f8ad4017e9be7",
+   "block": "65867820",
+   "time": 1790430905,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -210
+  },
+  {
+   "hash": "0xeb48479a2b7b6e9f5fb059999b24c1efc7300bb1b47da93a602274b5508957ff",
+   "block": "65867841",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -201
+  },
+  {
+   "hash": "0xeb65041eca004fc2ff2bed32e9ea0bba42b0a2ba983a228308e7026530c926b2",
+   "block": "65867841",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -189
+  },
+  {
+   "hash": "0x29b219338942decab89644b8fa21c02548c3c579d3acb9a8c34e2e171ae0dc2d",
+   "block": "65867841",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "Sensor reading",
+   "caseId": "s3/W02/temp",
+   "value": 91
+  },
+  {
+   "hash": "0x3ff24b9851d6a1d4cf00c72eb0a0a6b0edffaa95db74b45ac709a44e5a80cadf",
+   "block": "65867841",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -198
+  },
+  {
+   "hash": "0x8230456089c0f19c7cf28f2766913e03b82c83a9216966736e425b7030e382b0",
+   "block": "65867842",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 43
+  },
+  {
+   "hash": "0x0791964d8cb7f7dbb2edab953075e173a6f22d7713e78438dcfaa8c447c630d0",
+   "block": "65867842",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 3
+  },
+  {
+   "hash": "0x89a83a55806155a3633ec8bb1fc4a89bfe8abb5a742767cb0d23ba5321359716",
+   "block": "65867842",
+   "time": 1790430912,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -197
+  },
+  {
+   "hash": "0xe006dfc359b7e93405037b5c70004f49a9ccd54fc748348b5647f41d4c722e1a",
+   "block": "65867862",
+   "time": 1790430918,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -199
+  },
+  {
+   "hash": "0xeffc9ed878a59c977348c4046f18db8ff470e554a6ab273922738d0a023c1c9e",
+   "block": "65867862",
+   "time": 1790430918,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -204
+  },
+  {
+   "hash": "0x4c7cf1370aa391f15212f9893a700a191824c7434cdc6feecb900ee1d09c3b50",
+   "block": "65867862",
+   "time": 1790430918,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s3/W02/temp",
+   "value": 89,
+   "paidMon": 0.012,
+   "seconds": 3
+  },
+  {
+   "hash": "0x5adf191d3af86abfcf70cfdfa0db24f8c661c4181659f9cdce81e9433d3b641c",
+   "block": "65867862",
+   "time": 1790430918,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -203
+  },
+  {
+   "hash": "0x790708d2e7c800778e89630b190d8e42e7cd06ce8cd278075eb6e093b5bd5f1b",
+   "block": "65867863",
+   "time": 1790430919,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0x6753be43b935ff172b9ddd845724bc628f0b32fc70a981522fe42be24405f40f",
+   "block": "65867863",
+   "time": 1790430919,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 7
+  },
+  {
+   "hash": "0x0beb5c75014aafef29718305675505cbca45754cb043574acbc7166c9502d866",
+   "block": "65867863",
+   "time": 1790430919,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -200
+  },
+  {
+   "hash": "0x8a85b84260bdfead0581b9e575c2ce1abf087cf64adc666b0a34d2185835dce5",
+   "block": "65867883",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W02/temp",
+   "value": -209
+  },
+  {
+   "hash": "0x3998b5a460a52eac5181d2f41be077b6e447eaeb399e4a6a49d402e7984b3496",
+   "block": "65867883",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s1/W05/temp",
+   "value": -189
+  },
+  {
+   "hash": "0x38a4c8ba5e3b81fb9c7bae6ea1e4f4f4995f0326dcbf1fe91c79537c77ae2054",
+   "block": "65867883",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.01632",
+   "kind": "MON payment",
+   "caseId": "s3/W02/temp",
+   "value": 90,
+   "paidMon": 0.028,
+   "seconds": 7
+  },
+  {
+   "hash": "0xd586b7745e85a2fdf237cd39e62d568959e1e39c3328cb301aab138623e6e9c7",
+   "block": "65867884",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W04/temp",
+   "value": -191
+  },
+  {
+   "hash": "0x507b304b98f54249af24a4617bf0d439f89adfd4bd15061430a8e5086e28e5ff",
+   "block": "65867884",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.0053703",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/pressure",
+   "value": 42
+  },
+  {
+   "hash": "0xc61006837afc40cd7392534fe32a7530c58396894e351b2e3705125e7a3b3e58",
+   "block": "65867884",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.005368566",
+   "kind": "Sensor reading",
+   "caseId": "s3/W05/shock",
+   "value": 5
+  },
+  {
+   "hash": "0x124a960bcb52f15d9182797aaf0471245ba921d3f5ab52565592f37b06d0555e",
+   "block": "65867884",
+   "time": 1790430925,
+   "status": "success",
+   "feeMon": "0.0054162",
+   "kind": "Sensor reading",
+   "caseId": "s3/W07/temp",
+   "value": -194
+  }
+ ]
+};
+const EXP = "https://testnet.monadvision.com";
+const tx = (h) => '<a href="' + EXP + '/tx/' + h + '" target="_blank" rel="noreferrer" class="mono">' + h.slice(0, 10) + '…' + h.slice(-6) + '</a>';
+const addr = (a) => '<a href="' + EXP + '/address/' + a + '" target="_blank" rel="noreferrer" class="mono">' + a + '</a>';
+const short = (a) => a.slice(0, 6) + '…' + a.slice(-4);
+const time = (t) => new Date(t * 1000).toISOString().slice(11, 19);
+const date = (t) => new Date(t * 1000).toISOString().slice(0, 10);
+const tpl = Object.fromEntries((D.deployment.templates || []).map((t) => [t.caseId, t]));
+const unit = (id, v) => v === undefined || v === null ? '' : id.endsWith('/temp') ? (v / 10).toFixed(1) + ' °C' : id.endsWith('/pressure') ? (v / 10).toFixed(1) + ' bar' : (v / 10).toFixed(1) + ' g';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const mon = (n) => n.toLocaleString('de-DE', { maximumFractionDigits: 4 }) + ' MON';
+const eurEq = (n) => '≈ €' + Math.round(n * D.deployment.eurPerMon).toLocaleString('de-DE');
+const addrOf = Object.fromEntries(D.deployment.copies.map((c) => [c.caseId, c.address]));
+
+document.getElementById('collected').textContent = 'Collected ' + D.collectedAt.replace('T', ' ').slice(0, 19) + ' UTC from ' + D.rpc + '.';
+
+// ---- money to wallet 2 ----
+const pays = D.txs.filter((t) => t.kind === 'MON payment');
+const sumPaid = pays.reduce((s, t) => s + t.paidMon, 0);
+document.getElementById('custAddr').innerHTML = addr(D.deployment.customer);
+document.getElementById('custTotal').innerHTML = mon(sumPaid).replace(' MON', '') + ' <small>MON received · ' + eurEq(sumPaid) + '</small>';
+document.getElementById('custCheck').textContent = '✓ ' + pays.length + ' payments by the contracts · wallet balance now ' + mon(D.balances.customerMon) + ' (block ' + D.balances.atBlock + ')';
+document.getElementById('payRows').innerHTML = pays.slice().reverse().map((t) => {
+  const tp = tpl[t.caseId] || {};
+  return '<tr><td>' + date(t.time) + '<br><span class="small">' + time(t.time) + ' UTC · block ' + t.block + '</span></td>' +
+    '<td><b>' + esc(t.caseId) + '</b> ' + esc(tp.goods || '') + '<br><span class="small">read ' + unit(t.caseId, t.value) + ', limit ' + esc(tp.what || '') + ' · ' + t.seconds + ' s × ' + mon(Number(tp.rateWei) / 1e18) + '/s</span>' +
+    '<div class="flow small"><span>contract ' + short(addrOf[t.caseId] || '') + '</span><span class="arrow">→</span><span>wallet 2</span></div></td>' +
+    '<td class="amt">' + mon(t.paidMon) + '</td><td>' + tx(t.hash) + '</td></tr>';
+}).join('') || '<tr><td colspan="4" class="small">No payments yet.</td></tr>';
+const refunds = D.txs.filter((t) => t.kind === 'Delivery refund');
+document.getElementById('refundLine').innerHTML = 'Scale: 1 MON stands for €' + D.deployment.eurPerMon.toLocaleString('de-DE') + ' (terms from the case data). Wallet 1 (carrier) ' + addr(D.deployment.carrier) +
+  (refunds.length ? ' got ' + refunds.map((t) => mon(t.refundMon) + ' back from ' + esc(t.caseId) + ' (' + tx(t.hash) + ')').join('; ') + '.' : ' gets the rest of each bond back on delivery.');
+
+// ---- tiles ----
+const readings = D.txs.filter((t) => t.value !== undefined && t.value !== null);
+const payouts = pays;
+const perBlock = new Map();
+for (const t of D.txs) perBlock.set(t.block, (perBlock.get(t.block) || 0) + 1);
+const fees = D.txs.reduce((s, t) => s + Number(t.feeMon), 0);
+const failed = D.txs.filter((t) => t.status !== 'success').length;
+document.getElementById('tiles').innerHTML = [
+  ['Transactions', D.txs.length], ['Failed', failed], ['Sensor readings', readings.length],
+  ['MON payments', payouts.length], ['Most in one block', Math.max(...perBlock.values())], ['Gas fees', mon(fees)],
+].map(([k, v]) => '<div class="tile"><span>' + k + '</span><b>' + v + '</b></div>').join('');
+
+// ---- tooltip ----
+const tip = document.getElementById('tip');
+function showTip(e, html) { tip.innerHTML = html; tip.hidden = false; const x = Math.min(e.clientX + 14, innerWidth - 330); tip.style.left = x + 'px'; tip.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { tip.hidden = true; }
+
+// ---- transactions per block (bars) ----
+(function () {
+  const blocks = [...perBlock.entries()].sort((a, b) => Number(BigInt(a[0]) - BigInt(b[0])));
+  const W = 1180, H = 200, L = 34, B = 26, T = 10;
+  const max = Math.max(...blocks.map((b) => b[1]));
+  const bw = (W - L - 10) / blocks.length;
+  const y = (v) => T + (H - T - B) * (1 - v / max);
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Transactions per block">';
+  for (let g = 0; g <= max; g += Math.max(1, Math.ceil(max / 4))) {
+    s += '<line x1="' + L + '" x2="' + (W - 10) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="var(--grid)"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + g + '</text>';
+  }
+  blocks.forEach(([b, n], i) => {
+    const x = L + i * bw + 1, h = (H - T - B) * (n / max);
+    const kinds = D.txs.filter((t) => t.block === b).map((t) => t.kind);
+    const hasPay = kinds.includes('MON payment');
+    const top = y(n), r = Math.min(4, (bw - 2) / 2);
+    s += '<path d="M' + x + ',' + (H - B) + ' V' + (top + r) + ' Q' + x + ',' + top + ' ' + (x + r) + ',' + top + ' H' + (x + bw - 2 - r) + ' Q' + (x + bw - 2) + ',' + top + ' ' + (x + bw - 2) + ',' + (top + r) + ' V' + (H - B) + ' Z" fill="' + (hasPay ? 'var(--critical)' : 'var(--series)') + '" data-b="' + b + '" data-n="' + n + '" data-k="' + esc([...new Set(kinds)].join(', ')) + '"/>';
+    s += '<rect x="' + (L + i * bw) + '" y="' + T + '" width="' + bw + '" height="' + (H - T - B) + '" fill="transparent" data-b="' + b + '" data-n="' + n + '" data-k="' + esc([...new Set(kinds)].join(', ')) + '"/>';
+  });
+  s += '<text x="' + L + '" y="' + (H - 6) + '">block ' + blocks[0][0] + '</text><text x="' + (W - 10) + '" y="' + (H - 6) + '" text-anchor="end">block ' + blocks[blocks.length - 1][0] + '</text>';
+  s += '</svg><p class="small">Red bar = block with a MON payment. ' + blocks.length + ' blocks shown.</p>';
+  const el = document.getElementById('bars'); el.innerHTML = s;
+  el.querySelectorAll('[data-b]').forEach((r) => {
+    r.addEventListener('mousemove', (e) => showTip(e, '<b>block ' + r.dataset.b + '</b><br>' + r.dataset.n + ' transaction(s)<br><span class="small">' + r.dataset.k + '</span>'));
+    r.addEventListener('mouseleave', hideTip);
+  });
+})();
+
+// ---- readings small multiples ----
+(function () {
+  const byCase = new Map();
+  readings.forEach((t) => { if (!byCase.has(t.caseId)) byCase.set(t.caseId, []); byCase.get(t.caseId).push(t); });
+  const W = 300, H = 140, L = 54, R = 8, T = 16, B = 18;
+  let html = '';
+  for (const [id, rs] of [...byCase.entries()].sort()) {
+    const tp = tpl[id] || { limit: 0, what: '' };
+    const vals = rs.map((r) => r.value).concat([tp.limit]);
+    let lo = Math.min(...vals), hi = Math.max(...vals); const pad = Math.max(2, (hi - lo) * 0.15); lo -= pad; hi += pad;
+    const x = (i) => L + (W - L - R) * (rs.length === 1 ? 0.5 : i / (rs.length - 1));
+    const y = (v) => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(id) + ' readings">';
+    [lo + pad, (lo + hi) / 2, hi - pad].forEach((g) => { s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="var(--grid)"/><text x="' + (L - 4) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + unit(id, Math.round(g)) + '</text>'; });
+    s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(tp.limit) + '" y2="' + y(tp.limit) + '" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 3"/>';
+    s += '<polyline fill="none" stroke="var(--series)" stroke-width="2" stroke-linejoin="round" points="' + rs.map((r, i) => x(i) + ',' + y(r.value)).join(' ') + '"/>';
+    rs.forEach((r, i) => {
+      const pay = r.kind === 'MON payment';
+      s += '<circle cx="' + x(i) + '" cy="' + y(r.value) + '" r="' + (pay ? 6 : 4) + '" fill="' + (pay ? 'var(--critical)' : 'var(--series)') + '" stroke="var(--surface)" stroke-width="2" data-h="' + r.hash + '" data-v="' + esc(unit(id, r.value)) + '" data-b="' + r.block + '" data-p="' + (pay ? esc(mon(r.paidMon)) : '') + '"/>';
+      if (pay) {
+        const right = x(i) > W * 0.6, above = y(r.value) > T + 14;
+        s += '<text x="' + (right ? x(i) - 9 : x(i) + 9) + '" y="' + (above ? y(r.value) - 9 : y(r.value) + 16) + '" text-anchor="' + (right ? 'end' : 'start') + '" style="fill:var(--critical);font-weight:600">' + mon(r.paidMon) + '</text>';
+      }
+    });
+    s += '</svg>';
+    html += '<div class="mult"><h3>' + esc(id) + '</h3><div class="sub">' + esc(tp.goods || '') + ' · limit ' + esc(tp.what) + ' · ' + rs.length + ' readings</div>' + s + '</div>';
+  }
+  const el = document.getElementById('mults'); el.innerHTML = html;
+  el.querySelectorAll('circle').forEach((c) => {
+    c.addEventListener('mousemove', (e) => showTip(e, '<b>' + c.dataset.v + '</b><br>block ' + c.dataset.b + (c.dataset.p ? '<br><b style="color:var(--critical)">payout ' + c.dataset.p + ' → wallet 2</b>' : '') + '<br><span class="mono">' + c.dataset.h.slice(0, 18) + '…</span>'));
+    c.addEventListener('mouseleave', hideTip);
+    c.style.cursor = 'pointer';
+    c.addEventListener('click', () => window.open(EXP + '/tx/' + c.dataset.h, '_blank', 'noreferrer'));
+  });
+})();
+
+// ---- history table ----
+const fKind = document.getElementById('fKind'), fCase = document.getElementById('fCase'), fText = document.getElementById('fText');
+[...new Set(D.txs.map((t) => t.kind))].forEach((k) => fKind.insertAdjacentHTML('beforeend', '<option>' + esc(k) + '</option>'));
+[...new Set(D.txs.map((t) => t.caseId).filter(Boolean))].sort().forEach((k) => fCase.insertAdjacentHTML('beforeend', '<option>' + esc(k) + '</option>'));
+function renderHist() {
+  const q = fText.value.trim().toLowerCase();
+  const rows = D.txs.filter((t) => (!fKind.value || t.kind === fKind.value) && (!fCase.value || t.caseId === fCase.value) &&
+    (!q || [t.hash, t.block, t.caseId, t.kind].join(' ').toLowerCase().includes(q))).slice().reverse();
+  document.getElementById('fCount').textContent = rows.length + ' of ' + D.txs.length + ' transactions';
+  document.getElementById('histRows').innerHTML = rows.map((t) => {
+    const cls = t.kind === 'MON payment' ? 'pay-row' : t.kind === 'Delivery refund' ? 'refund-row' : '';
+    const paid = t.paidMon ? mon(t.paidMon) + ' → wallet 2' : t.refundMon ? mon(t.refundMon) + ' → wallet 1' : '';
+    return '<tr class="' + cls + '"><td>' + date(t.time) + ' ' + time(t.time) + '</td><td>' + t.block + '</td><td>' + esc(t.kind) + '</td><td>' + esc(t.caseId || '') + '</td>' +
+      '<td>' + (t.caseId ? unit(t.caseId, t.value) : '') + '</td><td>' + paid + '</td><td>' + Number(t.feeMon).toFixed(4) + ' MON</td>' +
+      '<td><span class="pill ' + (t.status === 'success' ? 'ok' : '') + '">' + esc(t.status) + '</span></td><td>' + tx(t.hash) + '</td></tr>';
+  }).join('');
+}
+[fKind, fCase].forEach((el) => el.addEventListener('change', renderHist));
+fText.addEventListener('input', renderHist);
+renderHist();
+</script>
+</body>
+</html>
