@@ -1,0 +1,256 @@
+/* Dense Analytics Container */
+.analytics-container-dense {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #08080a;
+  z-index: 40;
+  padding: calc(var(--header-height, 60px) + 20px) 24px 24px 24px;
+  overflow-y: auto;
+  color: #fff;
+}
+
+.analytics-bento-dense {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(min-content, auto);
+  gap: 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Grid Spans */
+.span-12 { grid-column: span 12; }
+.span-6 { grid-column: span 6; }
+.row-span-2 { grid-row: span 2; }
+
+/* Dense Card */
+.analytics-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header-dense {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.card-title-dense {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+
+.card-subtitle-dense {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* Top KPI Bar */
+.kpi-bar {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.kpi-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.kpi-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.kpi-val {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.kpi-trend {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kpi-desc {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* Network Performance Curve */
+.chart-wrapper {
+  flex: 1;
+  position: relative;
+  min-height: 200px;
+}
+
+.perf-chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.grid-line {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 1;
+}
+
+.planned-path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+}
+
+.actual-path {
+  fill: none;
+  stroke: var(--accent-amber);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.4));
+}
+
+.x-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* Dense Tables */
+.table-container {
+  overflow-x: auto;
+}
+
+.dense-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.dense-table th {
+  text-align: left;
+  padding: 8px;
+  color: var(--text-dim);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dense-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+}
+
+.col-main {
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.status-ok { color: var(--accent-emerald); }
+.status-warning { color: var(--accent-amber); }
+.status-critical { color: var(--accent-rose); }
+
+/* Health Bar inside table */
+.health-bar-bg {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.health-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.status-bg-ok { background: var(--accent-emerald); }
+.status-bg-warning { background: var(--accent-amber); }
+.status-bg-critical { background: var(--accent-rose); }
+
+/* Root Cause Bar */
+.root-cause-bar {
+  display: flex;
+  height: 12px;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.root-cause-segment {
+  height: 100%;
+  transition: width 1s ease;
+}
+
+.root-cause-segment:hover {
+  filter: brightness(1.2);
+}
+
+.root-cause-legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.legend-item-dense {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.legend-val {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+}

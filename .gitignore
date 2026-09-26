@@ -1,0 +1,16 @@
+.venv/
+*.fab
+__pycache__/
+!README.md
+node_modules/
+dist/
+.DS_Store
+.federation/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+*.local
+
+# OSM responses cached by soteria-frontend/scripts/fetch-rail-corridors.mjs
+.overpass-cache/

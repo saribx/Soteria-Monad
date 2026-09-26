@@ -1,0 +1,32 @@
+{
+  "incident_id": "INC-1003",
+  "train_id": "TR-1003",
+  "timestamp": "2026-09-16T18:00:00Z",
+  "location": "Berlin, Heidestraße (Europacity), km 0.9 from Berlin Hbf",
+  "reporter_role": "driver",
+  "incident_type": "damage_and_obstruction",
+  "symptom": "Storm-felled tree brought down the overhead line in front of the train; impact with tree and catenary mast, emergency stop",
+  "obstruction": {
+    "present": true,
+    "type": "large_structure",
+    "position": "in_front_of_locomotive",
+    "blocking_track": true
+  },
+  "affected_wagons": [
+    {
+      "wagon_id": "W02",
+      "damage_description": "Refrigeration unit torn from its mounting by the falling contact wire"
+    },
+    {
+      "wagon_id": "W03",
+      "damage_description": "Side wall ripped open by the tree trunk"
+    },
+    {
+      "wagon_id": "W05",
+      "damage_description": "Tank wagon: valve housing dented by a broken catenary cantilever, leak not ruled out"
+    }
+  ],
+  "train_operational": "immobilized",
+  "track_blocked": true,
+  "severity": "high"
+}

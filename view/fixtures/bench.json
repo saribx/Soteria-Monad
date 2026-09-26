@@ -1,0 +1,149 @@
+{
+  "generated_at": 1790419090.21594,
+  "baseline_source": "Assumed duration of a phone chain across five parties, including call-backs. Not measured -- an assumption that is reported as such.",
+  "numbers": {
+    "1_time": {
+      "logic_median_ms": 9.4,
+      "federation_median_s": 4.8,
+      "federation_max_s": 6.4,
+      "baseline_minutes": 47,
+      "baseline_is_assumption": true
+    },
+    "2_hits": {
+      "known": "2/2",
+      "holdout": null,
+      "reasons_matching": "2/2",
+      "truth_unconfirmed": [
+        "s1",
+        "s3"
+      ]
+    },
+    "3_boundary": {
+      "attempts": 156,
+      "refused": 64,
+      "authorised_raw": 54,
+      "violations": 0
+    },
+    "4_gap": {
+      "cases": 2,
+      "still_decided": 2
+    }
+  },
+  "cases": [
+    {
+      "id": "s1",
+      "title": "Small obstruction, refrigeration unit damaged on a fresh-goods wagon",
+      "holdout": false,
+      "truth": [
+        "cool"
+      ],
+      "truth_reason": "safety",
+      "truth_confirmed": false,
+      "decided": [
+        "cool"
+      ],
+      "decided_reason": "safety",
+      "refusal": null,
+      "hit": true,
+      "reason_matches": true,
+      "tier": 1,
+      "grants": [],
+      "receipt_hash": "d22860762bb50231",
+      "seconds_logic": 0.0096,
+      "seconds_federation": 6.4,
+      "quarantined": false,
+      "gap": {
+        "offline": [
+          "customer_c1_frischemarkt"
+        ],
+        "decided": [
+          "cool",
+          "hold"
+        ],
+        "reason": "missing_data",
+        "refusal": null
+      }
+    },
+    {
+      "id": "s3",
+      "title": "Storm-felled tree and overhead line hit just north of Berlin Hbf, train not operational, hazmat wagon damaged, residential buildings 300 m away",
+      "holdout": false,
+      "truth": [
+        "notify_authority",
+        "stop_train"
+      ],
+      "truth_reason": "safety",
+      "truth_confirmed": false,
+      "decided": [
+        "notify_authority",
+        "stop_train"
+      ],
+      "decided_reason": "safety",
+      "refusal": null,
+      "hit": true,
+      "reason_matches": true,
+      "tier": 3,
+      "grants": [
+        "ops-lead-rheinrail-1",
+        "safety-officer-rheinrail-2"
+      ],
+      "receipt_hash": "62b7f260f0b8f45b",
+      "seconds_logic": 0.0092,
+      "seconds_federation": 3.2,
+      "quarantined": true,
+      "gap": {
+        "offline": [
+          "customer_c3_chemiewerk"
+        ],
+        "decided": [
+          "notify_authority",
+          "stop_train"
+        ],
+        "reason": "safety",
+        "refusal": null
+      }
+    }
+  ],
+  "honesty": [
+    {
+      "claim": "No raw value reaches a role that may not have it",
+      "real": "156 boundary crossings attempted, 64 refused, 0 violations -- measured with a denominator",
+      "simulated": "nothing. The boundary proof calls the node handlers directly; the same code runs in the federation"
+    },
+    {
+      "claim": "Three parties, three nodes",
+      "real": "three SuperNodes with their own node-config, real federation messages, all cases hit",
+      "simulated": "the three nodes run on one machine"
+    },
+    {
+      "claim": "One federation per party",
+      "real": "one federation with three party nodes",
+      "simulated": "a ServerApp in flwr cannot reach three SuperLinks together -- that is the next stage, not the current state"
+    },
+    {
+      "claim": "Decision in minutes instead of a phone chain",
+      "real": "logic 9.4 ms, federation 4.8 s median",
+      "simulated": "the baseline of 47 min is an ASSUMPTION"
+    },
+    {
+      "claim": "Hit rate",
+      "real": "2/2 on the known cases",
+      "simulated": "the rules were written against exactly these cases -- a consistency check, not a generalisation. The ground truth is also unconfirmed (PROPOSAL). Holdout cases are missing."
+    },
+    {
+      "claim": "Agents",
+      "real": "one assessor as a ServerApp, party nodes as ClientApps",
+      "simulated": "the assessor is a rule engine, not a language model. The party nodes need none: a projection is a function"
+    },
+    {
+      "claim": "Data",
+      "real": "schema, validation, vocabularies",
+      "simulated": "all data is invented -- no real railway data, people or companies"
+    },
+    {
+      "claim": "Receipts",
+      "real": "chain across the whole incident, verify() recomputes it",
+      "simulated": "16 hex characters of SHA-256 -- a checksum, not cryptography for real emergencies"
+    }
+  ]
+}

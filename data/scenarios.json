@@ -1,0 +1,74 @@
+{
+  "_comment_stations": "journey.origin/destination: 'name' is what the fleet tab shows; with 'station' (an OSM station name on the corridor, prefix match) the map pins it at that station, otherwise at the corridor end as 'from …' / 'to …'.",
+  "_comment": "Where each case happens in the real world, and how it is shown. The single place to change a scenario's geography: the frontend (map, fleet tab, routes) and soteria-frontend/scripts/fetch-rail-corridors.mjs both read this file. Train and incident facts stay in data/<case_id>/ and are read from there, never copied. After changing a 'corridor' block run: node soteria-frontend/scripts/fetch-rail-corridors.mjs <route id>",
+  "_comment_journey": "journey.departure_time/arrival_time are the timetable, in UTC like the incident timestamp in data/<case_id>/. travel_time_min and progress_pct describe the train at the moment of the incident; the ETA is derived from arrival_time, so keep all of them in step when an incident time changes.",
+  "initial_focus": "s3",
+  "_comment_initial_focus": "case_id the map opens on, framed close up. null opens the world overview.",
+  "scenarios": [
+    {
+      "case_id": "s1",
+      "location_label": "Donner Pass, km 18.4",
+      "flag": "🇺🇸",
+      "route": {
+        "id": "route-donner-pass",
+        "code": "UP-1",
+        "name": "Union Pacific Roseville Subdivision, Donner Pass (Sierra Nevada, USA)",
+        "color": "#38bdf8"
+      },
+      "journey": {
+        "origin": { "name": "Oakland, CA" },
+        "destination": { "name": "Reno, NV" },
+        "departure_time": "12:40 PM",
+        "arrival_time": "07:15 PM",
+        "route_length_km": 386,
+        "travel_time_min": 315,
+        "progress_pct": 82
+      },
+      "train": { "livery": "union-pacific", "speed_kmh": 70 },
+      "obstruction": null,
+      "corridor": {
+        "_comment": "Just east of Tunnel 41 at Donner summit, rolling down towards Truckee.",
+        "sources": [{ "bbox": [39.27, -120.40, 39.36, -120.15] }],
+        "anchor": [-120.2950, 39.2999],
+        "toward": [-120.1856, 39.3275],
+        "back_m": 6000,
+        "forward_m": 19000
+      }
+    },
+    {
+      "case_id": "s3",
+      "location_label": "Berlin, Heidestraße (Europacity), km 0.9 from Berlin Hbf",
+      "flag": "🇩🇪",
+      "route": {
+        "id": "route-berlin-hamburg",
+        "code": "DE-6100",
+        "name": "Berlin Hbf – Hamburg Hbf (Lehrter Bahn, Berlin–Hamburg railway)",
+        "color": "#a855f7"
+      },
+      "journey": {
+        "origin": { "name": "Berlin Hbf", "station": "Berlin Hauptbahnhof" },
+        "destination": { "name": "Hamburg Hbf", "station": "Hamburg Hauptbahnhof" },
+        "departure_time": "05:56 PM",
+        "arrival_time": "10:05 PM",
+        "route_length_km": 286,
+        "travel_time_min": 4,
+        "progress_pct": 0.3
+      },
+      "train": { "livery": "db-cargo" },
+      "obstruction": { "ahead_m": 6, "model": "fallen_tree_catenary" },
+      "corridor": {
+        "_comment": "Locomotive just out of the north portal of the Hbf tunnel at Heidestraße. Berlin Hbf (tief) north through the tunnel onto the Lehrter Bahn (6107), at Spandau onto the Berlin–Hamburg railway (6100), into Hamburg Hbf. Later sources win at junctions in the direction of travel.",
+        "sources": [
+          { "bbox": [52.515, 13.355, 52.545, 13.38], "_what": "Berlin Hbf (tief) and the tunnel to the Lehrter Bahn" },
+          { "relation": 7099121, "_what": "6107 Berlin Hbf (tief) – Lehrte" },
+          { "relation": 5429644, "_what": "6100 Berlin – Hamburg" },
+          { "bbox": [53.53, 9.99, 53.565, 10.03], "_what": "Hamburg Hbf throat" }
+        ],
+        "anchor": [13.3634, 52.5319],
+        "toward": [13.2000, 52.5350],
+        "back_m": 1500,
+        "forward_m": 288200
+      }
+    }
+  ]
+}

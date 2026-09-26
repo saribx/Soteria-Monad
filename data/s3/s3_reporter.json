@@ -1,0 +1,22 @@
+{
+  "_comment": "See s1_reporter.json. Here the police also report -- likewise a human, not an agent.",
+  "party_type": "carrier",
+  "records": {
+    "reporter": {
+      "reporter_role": "driver",
+      "name": "Milos Varga (fictional)",
+      "staff_id": "TF-1108",
+      "phone": "+49 170 000-03",
+      "on_site": true,
+      "reported_at": "2026-09-16T18:01:00Z",
+      "statement": "Squall line hit just after we left Berlin Hbf. Coming out of the tunnel at Heidestrasse a tree came down across both tracks and took the overhead line with it. We hit the tree and the collapsed mast at about 40 km/h and stopped. Line is dead, three wagons visibly damaged, including the tank wagon W05. Europacity apartment blocks within sight.",
+      "secondary_reporters": [
+        {
+          "reporter_role": "police",
+          "name": "Chief Inspector Berit Sandow (fictional)",
+          "reported_at": "2026-09-16T18:14:00Z"
+        }
+      ]
+    }
+  }
+}

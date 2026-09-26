@@ -1,0 +1,24 @@
+{
+    "incident_id": "INC-1001",
+    "train_id": "TR-1001",
+    "timestamp": "2026-09-16T17:55:00Z",
+    "location": "Rail segment R-12, km 18.4",
+    "reporter_role": "driver",
+    "incident_type": "damage_and_obstruction",
+    "symptom": "Refrigeration unit on reefer wagon W02 damaged after minor impact with a small obstruction in front of the locomotive",
+    "obstruction": {
+      "present": true,
+      "type": "small_object",
+      "position": "in_front_of_locomotive",
+      "blocking_track": false
+    },
+    "affected_wagons": [
+      {
+        "wagon_id": "W02",
+        "damage_description": "Minor damage to refrigeration unit"
+      }
+    ],
+    "train_operational": "normal",
+    "track_blocked": false,
+    "severity": "low"
+  }
