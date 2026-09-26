@@ -124,6 +124,7 @@ export const live = {
     events: [] as ChainEvent[],
   },
   toasts: [] as Toast[],
+  notifications: [] as Toast[], // every toast, kept for the notification sidebar (newest last)
   ui: { controls: true, focusWagon: null as string | null },
 };
 
@@ -219,8 +220,11 @@ function toastFor(e: ChainEvent) {
     : e.name === 'DecisionAnchored' ? 'anchor'
     : null;
   if (!kind) return;
-  live.toasts.push({ id: e.key, kind, event: e, at: Date.now() });
+  const toast = { id: e.key, kind, event: e, at: Date.now() } as Toast;
+  live.toasts.push(toast);
   cap(live.toasts, 6);
+  live.notifications.push(toast);
+  cap(live.notifications, 100);
   channels.ui.bump();
 }
 
@@ -256,7 +260,12 @@ export function startLive() {
   });
 
   es.addEventListener('state', e => {
+    const wasLive = live.state?.live;
     live.state = JSON.parse((e as MessageEvent).data);
+    if (wasLive && !live.state!.live && !live.state!.busy) {
+      live.notifications = []; // a reset ends the run and its notifications
+      channels.ui.bump();
+    }
     live.relayer = true;
     for (const ev of live.state!.events ?? []) {
       addEvent({ name: ev.name, args: ev.args, tx: ev.tx, block: ev.block, at: ev.at, source: 'relayer' });

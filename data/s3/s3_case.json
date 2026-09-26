@@ -57,7 +57,7 @@
     "temperature_curve": {
       "W02": {
         "setpoint_c": 4.0,
-        "current_c": 11.8,
+        "current_c": 10.0,
         "limit_c": 8.0,
         "minutes_out": 55
       },

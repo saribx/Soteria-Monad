@@ -175,7 +175,7 @@ export const MonadPanel: React.FC = () => {
               <button className="monad-btn" disabled={!canRun || st.storm.running} onClick={() => control('storm')}>
                 <CloudLightning size={12} /> Storm burst · {hello.demo.storm.wagons} wagons
               </button>
-              <button className="monad-btn ghost" disabled={!!st.busy} onClick={() => control('reset')}>
+              <button className="monad-btn ghost" style={{ color: 'var(--accent-rose)', backgroundColor: 'rgba(225, 29, 72, 0.1)' }} disabled={!!st.busy} onClick={() => control('reset')}>
                 <RotateCcw size={12} /> Reset
               </button>
             </>

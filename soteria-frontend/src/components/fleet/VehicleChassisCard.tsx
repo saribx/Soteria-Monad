@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, TrainFront, Radio, Wifi } from 'lucide-react';
+import { TrainFront, Radio, Wifi } from 'lucide-react';
 import { useFleet } from '../../context/FleetContext';
 import { FleetAsset } from '../../types/fleet';
 
@@ -53,9 +53,21 @@ export const VehicleChassisCard: React.FC<VehicleChassisCardProps> = ({ asset })
             ({asset.origin} → {asset.destination})
           </span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', flexShrink: 0 }}>
-          <span className="card-header-icon">
-            <ArrowUpRight size={14} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span
+              className={`status-indicator ${isOffline ? 'rose' : isWarning ? 'amber' : 'emerald'}`}
+              style={{ width: '6px', height: '6px' }}
+            />
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 600,
+                color: isOffline ? 'var(--accent-rose)' : isWarning ? 'var(--text-amber)' : 'var(--text-emerald)'
+              }}
+            >
+              {isOffline ? 'Critical' : isWarning ? 'Warning' : 'Nominal'}
+            </span>
           </span>
           <span style={{ fontSize: '9px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{shortTime}</span>
         </div>
@@ -77,34 +89,7 @@ export const VehicleChassisCard: React.FC<VehicleChassisCardProps> = ({ asset })
         {asset.statusText}
       </div>
 
-      {/* Live status badge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-          <span
-            className={`status-indicator ${isOffline ? 'rose' : isWarning ? 'amber' : 'emerald'}`}
-            style={{ width: '6px', height: '6px' }}
-          />
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              color: isOffline ? 'var(--accent-rose)' : isWarning ? 'var(--text-amber)' : 'var(--text-emerald)'
-            }}
-          >
-            {isOffline ? 'Critical' : isWarning ? 'Warning' : 'Nominal'}
-          </span>
-        </span>
-      </div>
-
-      {/* ETA */}
-      <div>
-        <div style={{ fontSize: '8px', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>ETA</div>
-        <div style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
-          {isOffline ? '—' : `${asset.estimatedArrivalMin}m`}
-        </div>
-      </div>
-
-      {/* Footer: real connectivity state + cargo temp and current location */}
+      {/* Footer: real connectivity state + ETA + cargo temp and current location */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '9px', color: 'var(--text-muted)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
@@ -113,13 +98,19 @@ export const VehicleChassisCard: React.FC<VehicleChassisCardProps> = ({ asset })
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
             <Wifi size={10} color={asset.connectivity.lte ? 'var(--accent-emerald)' : 'var(--text-rose)'} />
-            LTE
+            1 ms
           </span>
           <span>{asset.connectivity.iotSensors} sensors</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}>ETA</span>
+            <span style={{ fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+              {isOffline ? '—' : `${asset.estimatedArrivalMin}m`}
+            </span>
+          </span>
         </div>
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
           {hasCargoTemp && <span style={{ fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{asset.currentTempC}°C</span>}
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }} title={asset.routeName}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }} title={asset.routeName}>
             {asset.routeName}
           </span>
         </span>

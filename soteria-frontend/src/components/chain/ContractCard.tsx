@@ -71,12 +71,9 @@ export const ContractCard: React.FC<{ assetId: string }> = ({ assetId }) => {
     <div className="glass-card command-card contract-card">
       {head(<><MonadMark size={10} /> {spec.shipment_ref} · #{sid}</>)}
 
-      <div className={`contract-accrual ${accruing > 0 ? 'is-live' : ''}`}>
-        {accruing > 0 ? (
-          <><strong>{eur(accruing)}</strong><span>accruing now · paid when the excursion ends</span></>
-        ) : (
-          <><strong>{eur(automatic + settled)}</strong><span>paid to the customer on chain</span></>
-        )}
+      <div className="contract-accrual">
+        <strong>{eur(automatic + settled)}</strong>
+        <span>paid to the customer on chain</span>
       </div>
 
       <div className="command-rows">

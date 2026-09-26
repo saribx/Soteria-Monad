@@ -11,6 +11,7 @@ import { FleetView } from './components/fleet/FleetView';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { IncidentsView } from './components/incidents/IncidentsView';
 import { MonadPanel } from './components/chain/MonadPanel';
+import { TransactionsView } from './components/chain/TransactionsView';
 import { ChainToasts } from './components/chain/ChainToasts';
 import { startLive } from './chain/store';
 
@@ -53,6 +54,8 @@ const DashboardContent: React.FC = () => {
         <AnalyticsView />
       ) : activeTab === 'incidents' ? (
         <IncidentsView />
+      ) : activeTab === 'transactions' ? (
+        <TransactionsView />
       ) : (
         /* Floating UI Elements Overlay (Hidden when isMapOnlyMode is true!) */
         !isMapOnlyMode && (
@@ -63,22 +66,22 @@ const DashboardContent: React.FC = () => {
             {/* Left Operational Column (KPIs, Efficiency 78.3%, Vehicle Chassis cards) */}
             <LeftDashboardPanel />
 
-            {/* Right Warnings & Alert Accordion */}
-            <IncidentDrawer />
-
             {/* Bottom Metrics (Schedule Offset ±2.5 min & Live Volume 142,580) */}
             <BottomMetricsPanel />
 
             {/* Right: the chain, the scenario controls and their timeline */}
             <MonadPanel />
 
-            {/* Floating Unit Editor Drawer */}
+      {/* Floating Unit Editor Drawer */}
             {isEditDrawerOpen && (
               <EditAssetDrawer onClose={() => setIsEditDrawerOpen(false)} />
             )}
           </div>
         )
       )}
+
+      {/* Right Warnings & Alert Accordion */}
+      <IncidentDrawer />
 
       {/* Payouts, alerts and anchored decisions as they land on chain (all tabs) */}
       <ChainToasts />

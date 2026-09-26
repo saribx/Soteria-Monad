@@ -7,16 +7,6 @@
 **Komplette Monad-Doku in einer Datei, speziell für LLMs / AI Coding Assistants.**
 **IMMER ZUERST HIER NACHSCHAUEN, bevor Annahmen über Monad getroffen werden (RPC, Chain-ID, Tooling, Precompiles, Gas etc.).**
 
----
-
-## Hackathon-Regeln (hart)
-
-1. **Kompletter Code wird heute geschrieben.** Keine bestehenden eigenen Projekte. Standard-Libraries sind ok.
-2. **Live-Deployment Pflicht.** Funktionierender, öffentlich erreichbarer Demo-Link. Nur lokal gehostet = Disqualifikation.
-3. **Öffentliches GitHub-Repo.**
-4. **3-Minuten-Demo.** Slides optional, die Live-Demo zählt.
-
-**Submission Freeze: 17:45 Uhr** – Einreichungsreihenfolge = Pitch-Reihenfolge.
 
 ## Fokus
 

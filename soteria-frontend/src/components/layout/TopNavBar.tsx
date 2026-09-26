@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MonadPill } from '../chain/MonadPill';
+import { useChainNotificationCount } from '../chain/ChainNotifications';
 import {
   Search,
   Bell,
@@ -33,6 +34,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
     isNotificationSidebarOpen,
     toggleNotificationSidebar
   } = useFleet();
+  const chainCount = useChainNotificationCount();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,9 +54,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   const navItems = [
     { id: 'live-map', label: 'Live Map' },
     { id: 'fleet', label: 'Fleet' },
-    { id: 'routes', label: 'Routes' },
+    { id: 'transactions', label: 'Transactions' },
     { id: 'analytics', label: 'Analytics' },
-    { id: 'maintenance', label: 'Maintenance' },
     { id: 'incidents', label: 'Incidents' },
   ];
 
@@ -349,7 +350,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             style={isNotificationSidebarOpen ? { borderColor: 'var(--accent-rose)', color: 'var(--accent-rose)', background: 'rgba(239, 68, 68, 0.15)' } : {}}
           >
             <Bell size={16} />
-            <span className="icon-badge">{incidents.length}</span>
+            <span className="icon-badge">{incidents.length + chainCount}</span>
           </button>
         </div>
 

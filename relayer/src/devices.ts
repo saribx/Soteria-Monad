@@ -70,6 +70,13 @@ const freshWindow = (now: number): Window => ({
   startedAt: now,
 });
 
+// The contract sees values in 0.1 °C, 0.01 bar and 0.01 g. Every threshold
+// decision here uses the same rounding, or device and contract could disagree
+// about whether a reading is in range (and the reading would run out of gas).
+const deci = (v: number) => Math.round(v * 10);
+const centi = (v: number) => Math.round(v * 100);
+const outOfRange = (tMin: number, tMax: number, minC: number, maxC: number) => deci(tMax) > deci(maxC) || deci(tMin) < deci(minC);
+
 const i16 = (v: number) => BigInt(Math.max(-32768, Math.min(32767, Math.round(v))) & 0xffff);
 const u16 = (v: number) => BigInt(Math.max(0, Math.min(65535, Math.round(v))));
 
@@ -201,13 +208,13 @@ export class Device {
       const { minC = -99, maxC = 99 } = this.limits;
       // 1 Hz only while it can still change money: approaching, or out and not capped
       if ((s.temp > maxC - 1 || s.temp < minC + 1) && !this.onChain.capped) this.escalate();
-      const out = w.tMax > maxC || w.tMin < minC;
+      const out = outOfRange(w.tMin, w.tMax, minC, maxC);
       if (out !== this.lastOut) immediate = true;
     } else if (this.kind === 'tank') {
       const { minBar = 0, shockMaxG = 99 } = this.limits;
       if (s.pressure < minBar + 0.15 && !this.alerted.pressure) this.escalate();
-      if (s.shock > shockMaxG && !this.alerted.shock) immediate = true;
-      if (s.pressure < minBar && !this.alerted.pressure) immediate = true;
+      if (centi(s.shock) > centi(shockMaxG) && !this.alerted.shock) immediate = true;
+      if (centi(s.pressure) < centi(minBar) && !this.alerted.pressure) immediate = true;
     } else {
       const stopped = s.speed < 0.5 && !this.arrived;
       if (stopped !== this.lastStopped) {
@@ -237,7 +244,7 @@ export class Device {
     let gas: bigint;
     if (this.kind === 'reefer') {
       const { minC = -99, maxC = 99, graceS = 0, rateEur = 0, capEur = 0 } = this.limits;
-      const out = w.tMax > maxC || w.tMin < minC;
+      const out = outOfRange(w.tMin, w.tMax, minC, maxC);
       this.lastOut = out;
       const c = this.onChain;
       const accrued = Math.max(0, (now - c.since) / 1000 - graceS) * rateEur;
@@ -246,11 +253,11 @@ export class Device {
     } else if (this.kind === 'tank') {
       const { minBar = 0, shockMaxG = 99 } = this.limits;
       gas = GAS.tank.rest;
-      if (w.shock > shockMaxG && !this.alerted.shock) {
+      if (centi(w.shock) > centi(shockMaxG) && !this.alerted.shock) {
         this.alerted.shock = true;
         gas = GAS.tank.alert;
       }
-      if (w.pMin < minBar && !this.alerted.pressure) {
+      if (centi(w.pMin) < centi(minBar) && !this.alerted.pressure) {
         this.alerted.pressure = true;
         gas = GAS.tank.alert;
       }

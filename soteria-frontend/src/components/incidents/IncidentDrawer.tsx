@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useFleet } from '../../context/FleetContext';
 import { SOTERIA_BY_INCIDENT } from '../../data/mockFleetData';
+import { ChainNotifications, useChainNotificationCount } from '../chain/ChainNotifications';
 
 export const IncidentDrawer: React.FC = () => {
   const { 
@@ -22,6 +23,7 @@ export const IncidentDrawer: React.FC = () => {
   } = useFleet();
   
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const chainCount = useChainNotificationCount();
 
   const severityColor = (severity: string) =>
     severity === 'high' || severity === 'critical'
@@ -67,7 +69,7 @@ export const IncidentDrawer: React.FC = () => {
                 Warnings & Incidents
               </h3>
               <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                {incidents.length} active incidents in the network
+                {incidents.length} active incidents{chainCount ? ` · ${chainCount} on-chain events` : ' in the network'}
               </span>
             </div>
           </div>
@@ -108,6 +110,9 @@ export const IncidentDrawer: React.FC = () => {
               </span>
               <span aria-hidden="true" style={{ fontSize: '14px' }}>↗</span>
             </button>
+            {/* Payouts, alerts, delays and anchored decisions from the chain */}
+            <ChainNotifications />
+
             {/* Incident reports: one collapsible card per report, one open at a time */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {incidents.map((incident) => {

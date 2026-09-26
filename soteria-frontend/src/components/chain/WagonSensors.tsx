@@ -31,7 +31,7 @@ function status(d: DeviceMeta, s: Series | undefined) {
   if (alerts.length) return { label: alerts.some(a => a.args.code === 2) ? 'Alert · pressure' : 'Alert · shock', tone: 'rose' as const };
   if (!d.bound) return { label: 'Not booked', tone: 'dim' as const };
   if (s?.escalated) return { label: '1 Hz on chain', tone: 'amber' as const };
-  return { label: `every ${live.hello?.demo.heartbeat_s ?? 10} s`, tone: 'ok' as const };
+  return { label: '', tone: 'ok' as const };
 }
 
 const DeviceTile: React.FC<{ d: DeviceMeta; selected: boolean; onSelect: () => void }> = ({ d, selected, onSelect }) => {
