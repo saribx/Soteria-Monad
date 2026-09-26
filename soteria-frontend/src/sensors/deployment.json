@@ -2,43 +2,44 @@
   "network": "testnet",
   "kind": "payout-mon",
   "eurPerMon": 100000,
-  "factory": "0x32b3b3a8fa69ba86e6c20494af5199d7535e823f",
+  "factory": "0x125a0db0c0ec3bd47abb8d82c53e4bc312406d28",
+  "fromBlock": "65875222",
   "oracle": "0x626422741d45C6470d28b93C367DB405671DdC86",
   "carrier": "0xe59841AdB191937C04934189AC34f6A5e8FBeA2c",
   "customer": "0x610C0DD8eA0f80e29d942a5977BAf6429E6BC020",
   "copies": [
     {
-      "address": "0xC84370c5442526EE74f6DF1a9c887ED85e908B1d",
+      "address": "0x7aD5D79b2B4b43754629A710cE1d91FF718742C9",
       "caseId": "s1/W02/temp",
       "index": 0
     },
     {
-      "address": "0x0Da1FC9845b1CB47629CB9F181486070A8a8A6F4",
+      "address": "0x8064E51Eb182aDf852E03Bd8f6688FbADA381Efa",
       "caseId": "s1/W05/temp",
       "index": 0
     },
     {
-      "address": "0x2aD99958386df7B4eC0A299077D75e795262b1c7",
+      "address": "0xDC578fe907E4F34b347BBC47C9c2c45b60CEf7F4",
       "caseId": "s3/W02/temp",
       "index": 0
     },
     {
-      "address": "0xcf10f652b9d92D92A7138A352e8d2B290e35922D",
+      "address": "0x08A99e0E2a28356AE204FcAb350A08aa66499387",
       "caseId": "s3/W04/temp",
       "index": 0
     },
     {
-      "address": "0xd2A4c3Bd2C130952f868b7532aDb4A6f569234Fb",
+      "address": "0x56C68686d05AcaB1445acb0AD623072925B14CD1",
       "caseId": "s3/W05/pressure",
       "index": 0
     },
     {
-      "address": "0x7F51809e9FeD0d981a48293bD7C054B007CF611C",
+      "address": "0xc274f4Ce8590BecbB764718A329Ec03f9b30bA8F",
       "caseId": "s3/W05/shock",
       "index": 0
     },
     {
-      "address": "0x46a7EC62d3Af72820275AC9981EA487CDD764f91",
+      "address": "0x60E847DdC7ecDd518379AB0c33bA501D288007f7",
       "caseId": "s3/W07/temp",
       "index": 0
     }
@@ -47,7 +48,7 @@
     {
       "caseId": "s1/W02/temp",
       "goods": "frozen food",
-      "what": "above -15 \u00b0C (overheat)",
+      "what": "above -15 °C (overheat)",
       "trigger": 1,
       "limit": -150,
       "bondEur": 6000,
@@ -62,7 +63,7 @@
     {
       "caseId": "s1/W05/temp",
       "goods": "frozen food",
-      "what": "above -15 \u00b0C (overheat)",
+      "what": "above -15 °C (overheat)",
       "trigger": 1,
       "limit": -150,
       "bondEur": 6000,
@@ -77,7 +78,7 @@
     {
       "caseId": "s3/W02/temp",
       "goods": "pharmaceuticals",
-      "what": "above 8 \u00b0C (overheat)",
+      "what": "above 8 °C (overheat)",
       "trigger": 1,
       "limit": 80,
       "bondEur": 12000,
@@ -92,7 +93,7 @@
     {
       "caseId": "s3/W04/temp",
       "goods": "frozen food",
-      "what": "above -15 \u00b0C (overheat)",
+      "what": "above -15 °C (overheat)",
       "trigger": 1,
       "limit": -150,
       "bondEur": 6000,
@@ -137,7 +138,7 @@
     {
       "caseId": "s3/W07/temp",
       "goods": "frozen food",
-      "what": "above -15 \u00b0C (overheat)",
+      "what": "above -15 °C (overheat)",
       "trigger": 1,
       "limit": -150,
       "bondEur": 6000,
@@ -149,6 +150,5 @@
       "rateWei": "200000000000000",
       "capWei": "60000000000000000"
     }
-  ],
-  "fromBlock": "65867133"
+  ]
 }

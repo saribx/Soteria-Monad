@@ -14,3 +14,5 @@ dist/
 
 # OSM responses cached by soteria-frontend/scripts/fetch-rail-corridors.mjs
 .overpass-cache/
+.vercel
+.env*

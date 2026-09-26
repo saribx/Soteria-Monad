@@ -54,9 +54,9 @@ app.innerHTML = `
 <p class="s-prov"><b>SIMULATED</b> sensor values (4 Hz stream, every 10th sample on-chain, breaches at once) · <b class="real">REAL</b> transactions, contract checks and MON payments (testnet MON)</p>
 <section class="s-controls">
   <button data-t="">Run all sensors <small>one reading per contract, all at once</small></button>
-  <button data-auto="12">Run 12 rounds <small>≈ 30 s: grace, paid seconds, recovery</small></button>
-  <button data-t="s1/W02/temp" class="hot">Overheat · frozen food <small>s1 W02 above −15 °C</small></button>
-  <button data-t="s3/W02/temp" class="hot">Overheat · pharma <small>s3 W02 above 8 °C</small></button>
+  <button data-auto="12">Run 12 rounds <small>all sensors, no incident · ≈ 50 s</small></button>
+  <button data-t="s1/W02/temp" class="hot">Overheat · frozen food <small>s1 W02 above −15 °C · ~40 s: grace, paid, recovery</small></button>
+  <button data-t="s3/W02/temp" class="hot">Overheat · pharma <small>s3 W02 above 8 °C · ~40 s: grace, paid, recovery</small></button>
   <button data-t="s3/W05/pressure" class="hot">Leak · hazmat tank <small>s3 W05 below 3.8 bar, no grace</small></button>
   <p id="result" class="s-result" aria-live="polite"></p>
 </section>
@@ -175,6 +175,8 @@ async function slowLoop() {
 }
 
 // ---- buttons --------------------------------------------------------------------------------------------------
+const HOT_ROUNDS = 5; // ≈ 21 s at one round per 4.2 s: 10 s grace, then ~11 s paid
+
 async function round(trigger?: string, label = ""): Promise<boolean> {
   const res = await fetch("/api/sensors", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ trigger }) });
   const r = await res.json();
@@ -191,10 +193,14 @@ document.querySelectorAll<HTMLButtonElement>(".s-controls button").forEach((b) =
     lastResult = "Sending one reading to every contract…";
     render();
     try {
-      const n = Number(b.dataset.auto ?? "1");
+      // a hot button plays the whole excursion: out of limits ~22 s (grace, then paid seconds), then back in limits
+      const n = Number(b.dataset.auto ?? (b.dataset.t ? "9" : "1"));
       for (let i = 1; i <= n; i++) {
         const t0 = Date.now();
-        const ok = await round(i === 1 ? b.dataset.t || undefined : undefined, n > 1 ? `round ${i}/${n} · ` : "");
+        // the page, not a chain read, decides how long the wagon stays hot: rounds 1–HOT_ROUNDS out of limits, then back in
+        const hot = b.dataset.t && i <= HOT_ROUNDS ? b.dataset.t : undefined;
+        const phase = b.dataset.t ? (i <= HOT_ROUNDS ? "🔥 out of limits · " : "❄️ back in limits · ") : "";
+        const ok = await round(hot, (n > 1 ? `round ${i}/${n} · ` : "") + phase);
         render();
         refreshStates().then(refreshBalances).then(render).catch(() => {});
         if (!ok) break;
