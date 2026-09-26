@@ -125,7 +125,7 @@ export const live = {
   },
   toasts: [] as Toast[],
   notifications: [] as Toast[], // every toast, kept for the notification sidebar (newest last)
-  ui: { controls: true, focusWagon: null as string | null },
+  ui: { controls: true, focusWagon: null as string | null, controlError: null as string | null },
 };
 
 const byKey = new Map<string, ChainEvent>();
@@ -430,8 +430,32 @@ function startChainFeed() {
 
 // ---------------------------------------------------------------- controls
 
+// A relayer on a public server only takes controls with its CONTROL_TOKEN.
+// Open the dashboard once with ?control=<token>; the browser keeps it.
+const TOKEN_KEY = 'soteria-control-token';
+function controlToken(): string {
+  try {
+    const url = new URL(window.location.href);
+    const fromUrl = url.searchParams.get('control');
+    if (fromUrl) {
+      localStorage.setItem(TOKEN_KEY, fromUrl);
+      url.searchParams.delete('control');
+      window.history.replaceState(null, '', url.toString());
+    }
+    return localStorage.getItem(TOKEN_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
 export async function control(action: 'live' | 's1' | 's3' | 'storm' | 'reset') {
-  await fetch(`${RELAYER_URL}/api/${action}`, { method: 'POST' });
+  const token = controlToken();
+  try {
+    const res = await fetch(`${RELAYER_URL}/api/${action}`, { method: 'POST', headers: token ? { 'x-control-token': token } : {} });
+    setUi({ controlError: res.status === 401 ? 'Control token missing or wrong: open the dashboard once with ?control=<token>' : null });
+  } catch {
+    setUi({ controlError: 'Relayer not reachable' });
+  }
 }
 
 export function setUi(patch: Partial<typeof live.ui>) {

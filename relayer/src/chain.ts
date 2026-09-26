@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import {
   decodeEventLog,
   encodeDeployData,
@@ -19,10 +19,24 @@ import { NETWORK, ROOT, SPEND_CAP_MON, type Endpoint } from './config.js';
 
 // ---------------------------------------------------------------- artifacts
 
+// ABI and bytecode come from Foundry's build output when it exists (local
+// development) and are mirrored to relayer/artifacts/, which is committed, so
+// a server without Foundry (Railway) runs from the copy.
 function artifact(name: string): { abi: Abi; bytecode: Hex } {
-  const path = resolve(ROOT, `contracts/out/${name}.sol/${name}.json`);
-  const file = JSON.parse(readFileSync(path, 'utf8'));
-  return { abi: file.abi, bytecode: file.bytecode.object };
+  const built = resolve(ROOT, `contracts/out/${name}.sol/${name}.json`);
+  const copy = resolve(ROOT, `relayer/artifacts/${name}.json`);
+  if (existsSync(built)) {
+    const file = JSON.parse(readFileSync(built, 'utf8'));
+    const art = { abi: file.abi, bytecode: file.bytecode.object };
+    const json = JSON.stringify(art, null, 1) + '\n';
+    if (!existsSync(copy) || readFileSync(copy, 'utf8') !== json) {
+      mkdirSync(dirname(copy), { recursive: true });
+      writeFileSync(copy, json);
+    }
+    return art;
+  }
+  if (!existsSync(copy)) throw new Error(`No ABI for ${name}: run forge build in contracts/`);
+  return JSON.parse(readFileSync(copy, 'utf8'));
 }
 
 export const RAIL = artifact('SoteriaRail');

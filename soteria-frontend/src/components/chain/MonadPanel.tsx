@@ -181,6 +181,7 @@ export const MonadPanel: React.FC = () => {
             </>
           )}
           {st.busy && <div className="monad-busy"><Loader2 size={12} className="step-spin" /> {st.busy}</div>}
+          {live.ui.controlError && <div className="monad-warn">{live.ui.controlError}</div>}
           <div className="monad-hint"><Zap size={10} /> {st.sendMode} · press D to hide controls</div>
         </div>
       )}

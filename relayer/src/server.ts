@@ -10,6 +10,7 @@ import { readDeployments } from './deployments.js';
 import { followFinality } from './finality.js';
 import { Demo, plain } from './scenarios.js';
 
+const CONTROL_TOKEN = process.env.CONTROL_TOKEN;
 const log = (m: string) => console.log(`${new Date().toLocaleTimeString('en-GB')}  ${m}`);
 
 const deployment = readDeployments()[NETWORK.name];
@@ -48,6 +49,7 @@ const hello = () => ({
   rail: deployment.rail,
   teur: deployment.teur,
   spendCapMon: SPEND_CAP_MON,
+  controlProtected: !!CONTROL_TOKEN,
   demo: DEMO,
 });
 
@@ -102,6 +104,9 @@ const actions: Record<string, () => Promise<void>> = {
 createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'x-control-token, content-type');
+  // Lets the deployed dashboard (https://…vercel.app) reach this relayer on localhost
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
   if (req.method === 'OPTIONS') {
     res.writeHead(204).end();
     return;
@@ -121,6 +126,11 @@ createServer((req, res) => {
   }
   const action = actions[url];
   if (action && req.method === 'POST') {
+    // Anyone may watch; only the holder of CONTROL_TOKEN may spend MON
+    if (CONTROL_TOKEN && req.headers['x-control-token'] !== CONTROL_TOKEN) {
+      res.writeHead(401, { 'content-type': 'application/json' }).end('{"ok":false,"error":"control token required"}');
+      return;
+    }
     log(`control ${url}`);
     lastControl = Date.now();
     void action().catch(e => log(`${url} failed: ${e instanceof Error ? e.message : e}`));
@@ -128,7 +138,7 @@ createServer((req, res) => {
     return;
   }
   res.writeHead(404).end();
-}).listen(PORT, () => {
+}).listen(PORT, '::', () => {
   log(`relayer on http://localhost:${PORT}  network ${NETWORK.name}  rail ${deployment.rail}`);
   log(`spend cap ${SPEND_CAP_MON} MON · auto-stop ${LIVE_MINUTES ? `${LIVE_MINUTES} min` : 'off'} · RPC ${NETWORK.rpc.map(e => new URL(e.url).host).join(', ')}`);
 });

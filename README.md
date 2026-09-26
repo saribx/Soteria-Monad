@@ -86,6 +86,25 @@ cd ../soteria-frontend && npm install && npm run dev   # terminal 3: dashboard
 3. Run `npm start` for the pitch.
 4. Run `npm run sweep` afterwards to return the parked MON.
 
+## Deploy (Railway + Vercel)
+
+The dashboard is static (Vercel, root directory `soteria-frontend`). The relayer is
+a long-running process (Railway, built from `relayer/Dockerfile` via `railway.json`).
+
+1. **Locally:** run `npm run setup` in `relayer/` with `MONAD_NETWORK=mainnet`. This
+   deploys, funds the keys and writes `relayer/.keys/mainnet.json` and
+   `data/monad/deployments.json`. Commit and push `deployments.json` (addresses only).
+2. **Railway variables:**
+   - `MONAD_NETWORK=mainnet`
+   - `RELAYER_KEYS` = the content of `relayer/.keys/mainnet.json` (secret)
+   - `CONTROL_TOKEN` = any long random string
+
+   `FUNDER_PRIVATE_KEY` is not needed there. Generate a public domain under
+   Settings → Networking.
+3. **Vercel:** set `VITE_RELAYER_URL=https://<railway domain>` and redeploy.
+4. **Presenter:** open the dashboard once as `https://<vercel domain>/?control=<CONTROL_TOKEN>`.
+   Everyone else can watch but not spend MON.
+
 ## Demo runbook (3 min)
 
 Everything is driven from the Monad panel on the right of the live map. Press **D**

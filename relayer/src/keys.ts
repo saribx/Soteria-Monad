@@ -36,6 +36,14 @@ interface KeyFile {
 const file = resolve(RELAYER_DIR, '.keys', `${NETWORK.name}.json`);
 
 function load(): KeyFile {
+  // On a server the keys come from the RELAYER_KEYS secret: the content of
+  // relayer/.keys/<network>.json written by `npm run setup` on your machine.
+  if (process.env.RELAYER_KEYS) {
+    const keys = JSON.parse(process.env.RELAYER_KEYS) as KeyFile;
+    const missing = deviceIds().filter(d => !keys.devices?.[d.key]).map(d => d.key);
+    if (!keys.roles || missing.length) throw new Error(`RELAYER_KEYS is incomplete (missing ${missing.join(', ') || 'roles'})`);
+    return keys;
+  }
   const stored: Partial<KeyFile> = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
   const roles = { ...(stored.roles ?? {}) } as Record<Role, `0x${string}`>;
   const devices = { ...(stored.devices ?? {}) };

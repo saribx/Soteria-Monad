@@ -94,6 +94,7 @@ export interface Hello {
   rail: `0x${string}`;
   teur: `0x${string}`;
   spendCapMon: number;
+  controlProtected?: boolean;
   demo: DemoSpec;
 }
 

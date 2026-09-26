@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { encodeFunctionData, hexToNumber, hexToString, pad, stringToHex, toHex, type Address, type Hex } from 'viem';
 import { DEMO, NETWORK, RELAYER_DIR, contractTerms, soteriaDecision, trainOf, type WagonSpec } from './config.js';
-import { BudgetExhausted, RAIL, Sender, budget, call, onLogs, rpc, sendMode, type DecodedLog } from './chain.js';
+import { BudgetExhausted, RAIL, Sender, budget, call, onLogs, readRail, rpc, sendMode, type DecodedLog } from './chain.js';
 import { Device, KIND_CODE, calibrate, setDeviceRail } from './devices.js';
 import { deviceIds, roleAccount } from './keys.js';
 import { LocoModel, ReeferModel, TankModel } from './physics.js';
@@ -235,8 +235,30 @@ export class Demo {
   }
 
   private async accept(caseId: CaseId | 'storm', sid: number) {
-    await call(this.customers[caseId], this.rail, RAIL.abi, 'accept', [sid], `accept shipment ${sid}`);
+    try {
+      await call(this.customers[caseId], this.rail, RAIL.abi, 'accept', [sid], `accept shipment ${sid}`);
+    } catch {
+      // A device is still bound to a shipment from before a restart: close that one, then retry
+      await this.releaseBusy(this.caseDevices(caseId));
+      await call(this.customers[caseId], this.rail, RAIL.abi, 'accept', [sid], `accept shipment ${sid}`);
+    }
     for (const d of this.caseDevices(caseId)) d.bound = true;
+  }
+
+  /** Closes, as its customer, any shipment of ours that still holds one of these devices. */
+  private async releaseBusy(devices: Device[]) {
+    const ours = new Map(Object.entries(this.customers).map(([c, s]) => [s.address.toLowerCase(), c as CaseId | 'storm']));
+    for (const d of devices) {
+      const wagonId = Number(await readRail<number>('deviceWagon', [d.address]));
+      if (!wagonId) continue;
+      const wagon = await readRail<readonly unknown[]>('wagons', [wagonId]);
+      const sid = Number(wagon[1]);
+      const shipment = await readRail<readonly unknown[]>('shipments', [sid]);
+      const owner = ours.get(String(shipment[5]).toLowerCase());
+      if (!owner) throw new Error(`${d.id.key} is bound to shipment ${sid} of another customer`);
+      this.log(`releasing shipment ${sid} left open before a restart`);
+      await this.closeShipment(sid, owner);
+    }
   }
 
   // ---------------------------------------------------------------- controls
