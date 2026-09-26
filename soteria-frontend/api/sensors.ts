@@ -3,13 +3,15 @@ import { runRound } from "./_lib/sensors.js";
 
 export async function POST(request: Request): Promise<Response> {
   let trigger: string | undefined;
+  let only: string | undefined;
   try {
-    const body = (await request.json()) as { trigger?: string };
+    const body = (await request.json()) as { trigger?: string; only?: string };
     trigger = typeof body.trigger === "string" && body.trigger ? body.trigger : undefined;
+    only = typeof body.only === "string" && body.only ? body.only : undefined;
   } catch {
     /* empty body = a normal round */
   }
-  const result = await runRound(process.env, trigger);
+  const result = await runRound(process.env, trigger, only);
   return new Response(JSON.stringify(result), {
     status: result.ok ? 200 : 409,
     headers: { "content-type": "application/json" },

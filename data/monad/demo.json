@@ -2,7 +2,7 @@
   "_comment": "What is monitored on chain and under which terms. Read by relayer/ (devices, bookings) and soteria-frontend/ (sensor panels, thresholds). Only wagons listed here carry a sensor; general goods carry none. Penalty, deadline and liability cap come from data/contracts/<contract>.json.",
   "_comment_timing": "Demo timings are compressed: a real grace period is minutes, a real standstill slack hours. Temperatures and pressures are realistic; the rate at which a failed unit warms is accelerated (see relayer/src/physics.ts).",
   "sample_hz": 4,
-  "heartbeat_s": 10,
+  "heartbeat_s": 20,
   "escalated_hz": 1,
   "calm_s": 30,
   "gap_after_s": 30,
@@ -41,11 +41,11 @@
     }
   },
   "storm": {
-    "wagons": 20,
-    "seconds": 12,
+    "wagons": 10,
+    "seconds": 10,
     "setpoint_c": -20,
     "min_c": -25,
     "max_c": -15,
-    "note": "Storm warning for the Berlin-Hamburg corridor: every monitored wagon on it switches to 1 Hz at once. Sized for testnet cost: 20 wagons x 12 s = 240 readings, about 1.4 MON at 102 gwei (50 x 30 s was about 8.9 MON)"
+    "note": "Storm warning for the Berlin-Hamburg corridor: every monitored wagon on it switches to 1 Hz at once. Sized for testnet cost: 10 wagons x 10 s = 100 readings, about 0.6 MON at 102 gwei (50 x 30 s was about 8.9 MON)"
   }
 }
