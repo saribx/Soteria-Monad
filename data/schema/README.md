@@ -1,7 +1,7 @@
 # Data schema — how to change it
 
 Everything here is **invented**. No real railway data, no real people, no real
-companies. The honesty table of the submission says exactly that.
+companies.
 
 Check as often as you like — needs no model, no network, no SuperLink:
 
@@ -118,7 +118,7 @@ our four numbers. `truth.tier` must match the maximum of the tiers
 `truth.must_not` is optional and valuable: it names measures that would be
 wrong. A hit that also picks a `must_not` measure does not count.
 
-While the ground truth has not been confirmed by the data specialist, its
+While the ground truth has not been confirmed by a domain expert, its
 `_status` starts with `PROPOSAL`; the validator warns about it and the bench
 reports the hit rate as unconfirmed.
 

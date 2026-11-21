@@ -755,21 +755,6 @@ def test_policy_violation_is_raisable_and_typed():
         ledger.check_taint(Role(name="r", brief="", tools=("web_fetch",)))
 
 
-@pytest.mark.skip(
-    reason="checks the inherited librarian/researcher roster; for Soteria "
-    "uebernimmt tests/test_roles.py diese Aufgabe mit den fuenf Rollen"
-)
-def test_demo_charter_is_valid_and_demonstrates_the_policy():
-    """The shipped charter must actually contain the roles the pitch describes."""
-    from soteria.agent_app import CHARTER
-
-    assert isinstance(CHARTER, Charter)
-    assert CHARTER.private_sources() == frozenset({"librarian"})
-    assert "researcher" in CHARTER.outbound_holders()
-    assert CHARTER.taint_risk() == ("librarian -> researcher",)
-    assert CHARTER.budget.seconds <= 300  # SuperGrid task limit
-
-
 def test_empty_message_triggers_one_uncapped_retry():
     """REGRESSION: a reasoning model spends max_output_tokens on thinking and
     emits an empty message while still reporting status='completed'. Measured on

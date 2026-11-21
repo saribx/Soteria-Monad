@@ -116,7 +116,7 @@
     }
   ],
   "truth": {
-    "_status": "PROPOSAL from the engine track -- please confirm or correct",
+    "_status": "PROPOSAL -- not yet reviewed by a domain expert, please confirm or correct",
     "measures": [
       "stop_train",
       "notify_authority"

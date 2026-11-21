@@ -24,7 +24,7 @@
         "travel_time_min": 315,
         "progress_pct": 82
       },
-      "train": { "livery": "union-pacific", "speed_kmh": 70 },
+      "train": { "livery": "yellow-diesel", "speed_kmh": 70 },
       "obstruction": null,
       "corridor": {
         "_comment": "Just east of Tunnel 41 at Donner summit, rolling down towards Truckee.",
@@ -54,7 +54,7 @@
         "travel_time_min": 4,
         "progress_pct": 0.3
       },
-      "train": { "livery": "db-cargo" },
+      "train": { "livery": "red-electric" },
       "obstruction": { "ahead_m": 6, "model": "fallen_tree_catenary" },
       "corridor": {
         "_comment": "Locomotive just out of the north portal of the Hbf tunnel at Heidestraße. Berlin Hbf (tief) north through the tunnel onto the Lehrter Bahn (6107), at Spandau onto the Berlin–Hamburg railway (6100), into Hamburg Hbf. Later sources win at junctions in the direction of travel.",

@@ -18,3 +18,9 @@ dist/
 .env*
 relayer.log
 frontend.log
+
+# Demo film: rendered media and private notes stay local
+demo-video/*.mp4
+demo-video/*.wav
+demo-video/outreach.md
+demo-video/linkedin-post.md

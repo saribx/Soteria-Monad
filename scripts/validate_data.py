@@ -1,4 +1,4 @@
-"""Self-service for the data track: checks the whole data tree.
+"""Self-service for whoever edits the case data: checks the whole data tree.
 
     uv run python scripts/validate_data.py              # everything
     uv run python scripts/validate_data.py data/s3      # one case
@@ -345,7 +345,7 @@ def check_case(case_dir: Path, vocabs: dict, catalogue: dict, party_ids: set[str
         out.append(f"{name}: truth lists {sorted(overlap)} in both measures and must_not")
     if str(truth.get("_status", "")).startswith("PROPOSAL"):
         out.append(f"{name}: WARNING truth is still marked PROPOSAL -- "
-                   "the data specialist must confirm it")
+                   "a domain expert must confirm it")
 
 
 def main() -> int:

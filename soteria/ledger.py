@@ -1,8 +1,8 @@
 """Budget enforcement, taint tracking and the audit trail.
 
 Every hop between agents is recorded here and emitted to the frontend, so
-"safety and oversight" is something a judge can watch happen live rather than a
-claim on a slide.
+"safety and oversight" is something anyone can watch happen live rather than a
+claim in a document.
 
 Three things this module is careful about, because the first version got each of
 them wrong:

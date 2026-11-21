@@ -74,7 +74,7 @@ def test_temperature_curve_becomes_a_traffic_light_for_the_assessor():
 
 
 def test_cargo_class_reaches_the_assessor_only_coarsely():
-    """The vocabulary comes from the data track: pharmaceutical, perishable, hazmat, general_goods."""
+    """The vocabulary comes from the case data: pharmaceutical, perishable, hazmat, general_goods."""
     assert project("cargo_class", "pharmaceutical", "assessor", DEFAULT_THRESHOLDS) == "regulated"
     assert project("cargo_class", "hazmat", "assessor", DEFAULT_THRESHOLDS) == "hazardous"
     # The coarse class is deliberately NOT named like the fine value -- otherwise

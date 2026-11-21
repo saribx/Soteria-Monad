@@ -28,7 +28,7 @@
   },
 
   "measurements": {
-    "_comment": "Telemetry of the affected wagons. Belongs to record type 'incident'. Can move into s1_incident.json later, once the data track adds telematics.",
+    "_comment": "Telemetry of the affected wagons. Belongs to record type 'incident'. Can move into s1_incident.json once incidents carry telematics.",
     "temperature_curve": {
       "W02": {"setpoint_c": 4.0, "current_c": 30.0, "limit_c": 8.0, "minutes_out": 20}
     }
@@ -40,7 +40,7 @@
   "keys": [],
 
   "truth": {
-    "_status": "PROPOSAL from the engine track -- data specialist, please confirm or correct",
+    "_status": "PROPOSAL -- not yet reviewed by a domain expert, please confirm or correct",
     "measures": ["cool"],
     "tier": 1,
     "reason_code": "safety",

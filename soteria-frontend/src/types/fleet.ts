@@ -17,7 +17,7 @@ export interface TrainWagon {
   damage?: string; // damage description from the incident report
 }
 
-export type TrainLivery = 'union-pacific' | 'db-cargo';
+export type TrainLivery = 'yellow-diesel' | 'red-electric';
 
 // Where a train physically stands on a real rail corridor (see src/map/railGeometry.ts).
 export interface TrainPlacement {

@@ -12,7 +12,7 @@ Adding a new field to an event is allowed. Renaming or removing a field only
 after agreement.
 
 **Both views: one HTML file, CSS and JS inline, no external requests** — no CDN,
-no Google Fonts. 58 people share the Wi-Fi. Load the JSON via `fetch`, with a
+no Google Fonts, so they work offline. Load the JSON via `fetch`, with a
 file picker as a fallback for `file://`.
 
 **The view never shows a value that is not in the event.** No lookups in

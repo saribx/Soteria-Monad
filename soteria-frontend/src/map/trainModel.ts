@@ -20,10 +20,10 @@ interface Part {
 }
 
 const LIVERIES: Record<TrainLivery, { body: string; accent: string; roof: string; length: number; operator: string }> = {
-  // Union Pacific "Armour Yellow" with Harbor Mist grey roof and signal-red stripe
-  'union-pacific': { body: '#f2b10a', accent: '#b91c1c', roof: '#8a8f98', length: 22.5, operator: 'Union Pacific' },
-  // DB Cargo traffic red with light-grey roof (Vectron / BR 193-style electric)
-  'db-cargo': { body: '#ec0016', accent: '#f0f0f0', roof: '#9ca3af', length: 18.98, operator: 'DB Cargo' },
+  // Yellow diesel with a grey roof and a red stripe (North American style)
+  'yellow-diesel': { body: '#f2b10a', accent: '#b91c1c', roof: '#8a8f98', length: 22.5, operator: 'Freight' },
+  // Red electric with a light-grey roof (European four-axle electric)
+  'red-electric': { body: '#ec0016', accent: '#f0f0f0', roof: '#9ca3af', length: 18.98, operator: 'Freight' },
 };
 
 export const COUPLING_GAP_M = 1.1;

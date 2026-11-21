@@ -8,7 +8,7 @@ about itself.
 
 **Honesty:** the order of the rules was written against the known cases. Their
 hit rate is therefore a consistency check, not a claim. The rate over the
-holdout cases, which the data track does not reveal, is the only number that
+holdout cases, which the rules were not written against, is the only number that
 claims anything.
 
 The order of the rules is the order of irreversibility:

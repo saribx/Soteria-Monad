@@ -262,7 +262,7 @@ class Charter:
             raise CharterError(f"Unknown role {name!r}") from None
 
     def delegation_graph(self) -> str:
-        """Render the graph for the demo slide and the audit header."""
+        """Render the graph for the overview and the audit header."""
         lines = [f"supervisor: {self.supervisor}"]
         for name in sorted(self.roles):
             role = self.roles[name]

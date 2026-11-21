@@ -5,8 +5,8 @@ was changed afterwards", because every entry goes into the hash of the next.
 `verify()` recomputes them; a changed field anywhere in the middle shows up.
 
 The hash is truncated to 16 hex characters. That is not cryptography for real
-emergencies but a checksum that fits on a slide -- and the honesty table says
-exactly that.
+emergencies but a short checksum a person can compare by eye. A production
+version would keep the full digest.
 """
 
 from __future__ import annotations
